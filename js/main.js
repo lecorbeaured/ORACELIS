@@ -2,6 +2,93 @@
  * ORACELIS Main Landing Page JavaScript
  */
 
+// Rate Limiting Configuration
+const RATE_LIMIT = {
+  maxReadings: 5,        // Max free readings per day
+  windowMs: 24 * 60 * 60 * 1000,  // 24 hours
+  storageKey: 'oracelis_readings'
+};
+
+// Simple browser fingerprint (not bulletproof but deters casual abuse)
+function getDeviceId() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillText('ORACELIS', 2, 2);
+  const canvasData = canvas.toDataURL();
+  
+  const data = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width + 'x' + screen.height,
+    new Date().getTimezoneOffset(),
+    canvasData.slice(-50)
+  ].join('|');
+  
+  // Simple hash
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) {
+    const char = data.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return 'dev_' + Math.abs(hash).toString(36);
+}
+
+// Check and update rate limit
+function checkReadingRateLimit() {
+  const deviceId = getDeviceId();
+  const now = Date.now();
+  
+  try {
+    const stored = localStorage.getItem(RATE_LIMIT.storageKey);
+    let data = stored ? JSON.parse(stored) : {};
+    
+    // Clean up old entries
+    if (data.deviceId !== deviceId || (now - data.windowStart) > RATE_LIMIT.windowMs) {
+      data = { deviceId, windowStart: now, count: 0 };
+    }
+    
+    // Check limit
+    if (data.count >= RATE_LIMIT.maxReadings) {
+      const resetTime = new Date(data.windowStart + RATE_LIMIT.windowMs);
+      const hoursLeft = Math.ceil((resetTime - now) / (60 * 60 * 1000));
+      return { 
+        allowed: false, 
+        message: `You've reached the limit of ${RATE_LIMIT.maxReadings} free readings. Try again in ${hoursLeft} hour${hoursLeft > 1 ? 's' : ''}.`,
+        remaining: 0
+      };
+    }
+    
+    return { allowed: true, remaining: RATE_LIMIT.maxReadings - data.count };
+  } catch (e) {
+    // If localStorage fails, allow the reading
+    return { allowed: true, remaining: RATE_LIMIT.maxReadings };
+  }
+}
+
+// Record a reading
+function recordReading() {
+  const deviceId = getDeviceId();
+  const now = Date.now();
+  
+  try {
+    const stored = localStorage.getItem(RATE_LIMIT.storageKey);
+    let data = stored ? JSON.parse(stored) : {};
+    
+    // Reset if new window or new device
+    if (data.deviceId !== deviceId || (now - data.windowStart) > RATE_LIMIT.windowMs) {
+      data = { deviceId, windowStart: now, count: 0 };
+    }
+    
+    data.count++;
+    localStorage.setItem(RATE_LIMIT.storageKey, JSON.stringify(data));
+  } catch (e) {
+    // Silently fail if localStorage is unavailable
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   createStarField();
   initForm();
@@ -96,8 +183,18 @@ function handleFormSubmit(e) {
   if (!dateOfBirth) { showError('dateOfBirth', 'Please enter your date of birth'); isValid = false; }
   if (!isValid) return;
   
+  // Check rate limit
+  const rateCheck = checkReadingRateLimit();
+  if (!rateCheck.allowed) {
+    showRateLimitError(rateCheck.message);
+    return;
+  }
+  
   // Track form submission
   if (typeof trackFormSubmit === 'function') trackFormSubmit(!!timeOfBirth);
+  
+  // Record this reading attempt
+  recordReading();
   
   const submitBtn = form.querySelector('.submit-btn');
   submitBtn.disabled = true;
@@ -105,6 +202,23 @@ function handleFormSubmit(e) {
   
   window.pendingReadingData = { firstName, dateOfBirth, timeOfBirth };
   showTimer();
+}
+
+function showRateLimitError(message) {
+  // Remove existing rate limit error
+  const existing = document.querySelector('.rate-limit-error');
+  if (existing) existing.remove();
+  
+  const form = document.getElementById('birth-form');
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'rate-limit-error';
+  errorDiv.innerHTML = `
+    <div style="background: rgba(255, 100, 100, 0.1); border: 1px solid rgba(255, 100, 100, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; text-align: center;">
+      <p style="color: #ff9999; margin: 0; font-size: 0.9rem;">${message}</p>
+      <p style="color: var(--moonbeam); margin: 0.5rem 0 0; font-size: 0.8rem;">Upgrade to unlock unlimited access to your complete reading.</p>
+    </div>
+  `;
+  form.parentElement.insertBefore(errorDiv, form);
 }
 
 function showError(inputId, message) {

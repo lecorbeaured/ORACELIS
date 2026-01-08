@@ -20,10 +20,12 @@ const legalContent = {
       <input type="hidden" name="access_key" value="adca3f09-d5f7-4d5a-aedb-c4a0b9a7ca01">
       <input type="hidden" name="subject" value="New ORACELIS Contact Form Submission">
       <input type="hidden" name="from_name" value="ORACELIS Contact Form">
+      <input type="checkbox" name="botcheck" class="hidden" style="display:none !important;">
       <input type="text" name="name" placeholder="Your Name" required>
       <input type="email" name="email" placeholder="Your Email" required>
       <textarea name="message" placeholder="Your Message" required></textarea>
       <button type="submit" class="btn btn-primary">Send Message</button>
+      <div id="contact-status"></div>
     </form>
   `,
   
@@ -222,19 +224,78 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+// Contact form rate limiting
+const CONTACT_RATE_LIMIT = {
+  maxMessages: 3,
+  windowMs: 60 * 60 * 1000, // 1 hour
+  storageKey: 'oracelis_contact'
+};
+
+function checkContactRateLimit() {
+  const now = Date.now();
+  try {
+    const stored = localStorage.getItem(CONTACT_RATE_LIMIT.storageKey);
+    let data = stored ? JSON.parse(stored) : { windowStart: now, count: 0 };
+    
+    // Reset if window expired
+    if ((now - data.windowStart) > CONTACT_RATE_LIMIT.windowMs) {
+      data = { windowStart: now, count: 0 };
+    }
+    
+    if (data.count >= CONTACT_RATE_LIMIT.maxMessages) {
+      const minsLeft = Math.ceil((data.windowStart + CONTACT_RATE_LIMIT.windowMs - now) / 60000);
+      return { allowed: false, message: `Too many messages. Try again in ${minsLeft} minute${minsLeft > 1 ? 's' : ''}.` };
+    }
+    
+    return { allowed: true };
+  } catch (e) {
+    return { allowed: true };
+  }
+}
+
+function recordContactSubmission() {
+  const now = Date.now();
+  try {
+    const stored = localStorage.getItem(CONTACT_RATE_LIMIT.storageKey);
+    let data = stored ? JSON.parse(stored) : { windowStart: now, count: 0 };
+    
+    if ((now - data.windowStart) > CONTACT_RATE_LIMIT.windowMs) {
+      data = { windowStart: now, count: 0 };
+    }
+    
+    data.count++;
+    localStorage.setItem(CONTACT_RATE_LIMIT.storageKey, JSON.stringify(data));
+  } catch (e) {}
+}
+
 // Contact form handler - Web3Forms
 async function handleContactSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const submitBtn = form.querySelector('button[type="submit"]');
+  const statusDiv = document.getElementById('contact-status');
+  
+  // Check honeypot (bot check)
+  if (form.querySelector('input[name="botcheck"]').checked) {
+    return; // Bot detected
+  }
+  
+  // Check rate limit
+  const rateCheck = checkContactRateLimit();
+  if (!rateCheck.allowed) {
+    statusDiv.innerHTML = `<p style="color: #ff9999; font-size: 0.85rem; margin-top: 0.5rem;">${rateCheck.message}</p>`;
+    return;
+  }
   
   // Disable button and show loading
   submitBtn.disabled = true;
   submitBtn.textContent = 'Sending...';
+  statusDiv.innerHTML = '';
   
   try {
     const formData = new FormData(form);
     const object = Object.fromEntries(formData);
+    delete object.botcheck; // Remove honeypot from submission
     const json = JSON.stringify(object);
     
     const response = await fetch('https://api.web3forms.com/submit', {
@@ -249,6 +310,7 @@ async function handleContactSubmit(e) {
     const data = await response.json();
     
     if (data.success) {
+      recordContactSubmission();
       form.innerHTML = '<p style="color: var(--gold-shimmer); text-align: center;">✓ Thank you! Your message has been sent. We\'ll get back to you soon.</p>';
     } else {
       throw new Error(data.message || 'Failed to send message');
@@ -257,6 +319,6 @@ async function handleContactSubmit(e) {
     console.error('Contact form error:', error);
     submitBtn.disabled = false;
     submitBtn.textContent = 'Send Message';
-    alert('Failed to send message. Please try again or email us directly at support@oracelis.app');
+    statusDiv.innerHTML = '<p style="color: #ff9999; font-size: 0.85rem; margin-top: 0.5rem;">Failed to send. Please try again or email us directly.</p>';
   }
 }

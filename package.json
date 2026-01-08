@@ -1,0 +1,13 @@
+{
+  "name": "oracelis",
+  "version": "1.0.0",
+  "description": "ORACELIS - Personalized Spiritual Readings",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "stripe": "^14.0.0"
+  }
+}

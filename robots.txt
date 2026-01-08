@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /reading.html
+
+Sitemap: https://oracelis.app/sitemap.xml

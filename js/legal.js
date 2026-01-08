@@ -16,7 +16,10 @@ const legalContent = {
     <p>ORACELIS<br>Las Vegas, NV<br>United States</p>
     
     <h3>Send a Message</h3>
-    <form class="contact-form" onsubmit="handleContactSubmit(event)">
+    <form class="contact-form" id="contact-form" onsubmit="handleContactSubmit(event)">
+      <input type="hidden" name="access_key" value="adca3f09-d5f7-4d5a-aedb-c4a0b9a7ca01">
+      <input type="hidden" name="subject" value="New ORACELIS Contact Form Submission">
+      <input type="hidden" name="from_name" value="ORACELIS Contact Form">
       <input type="text" name="name" placeholder="Your Name" required>
       <input type="email" name="email" placeholder="Your Email" required>
       <textarea name="message" placeholder="Your Message" required></textarea>
@@ -219,39 +222,41 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// Contact form handler
+// Contact form handler - Web3Forms
 async function handleContactSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const submitBtn = form.querySelector('button[type="submit"]');
-  const name = form.querySelector('input[name="name"]').value;
-  const email = form.querySelector('input[name="email"]').value;
-  const message = form.querySelector('textarea[name="message"]').value;
   
   // Disable button and show loading
   submitBtn.disabled = true;
   submitBtn.textContent = 'Sending...';
   
   try {
-    const response = await fetch('/api/contact', {
+    const formData = new FormData(form);
+    const object = Object.fromEntries(formData);
+    const json = JSON.stringify(object);
+    
+    const response = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, message })
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: json
     });
     
     const data = await response.json();
     
-    if (response.ok && data.success) {
+    if (data.success) {
       form.innerHTML = '<p style="color: var(--gold-shimmer); text-align: center;">✓ Thank you! Your message has been sent. We\'ll get back to you soon.</p>';
     } else {
-      throw new Error(data.error || 'Failed to send message');
+      throw new Error(data.message || 'Failed to send message');
     }
   } catch (error) {
     console.error('Contact form error:', error);
-    // Fallback to mailto
-    const subject = encodeURIComponent('ORACELIS Contact Form');
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-    window.location.href = `mailto:support@oracelis.app?subject=${subject}&body=${body}`;
-    form.innerHTML = '<p style="color: var(--gold-shimmer); text-align: center;">Opening your email client...</p>';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send Message';
+    alert('Failed to send message. Please try again or email us directly at support@oracelis.app');
   }
 }

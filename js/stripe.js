@@ -1,3 +1,26 @@
+/**
+ * ORACELIS Stripe Integration
+ * 
+ * ENVIRONMENT TOGGLE
+ * Set to 'test' for testing, 'live' for production
+ */
+const STRIPE_ENV = 'test'; // Change to 'live' for production
+
+const STRIPE_CONFIG = {
+  test: {
+    publishableKey: 'pk_test_51Pc8WRJhzVL29jxA6G1cOzTiWaa0jdbWyIBtIcgv6Xut6W3x9UBQJczrGSptVHmayr3juYYFfqRuUd92I1in0LS000LOVmxOyG', // Replace with your test key
+  },
+  live: {
+    publishableKey: 'pk_live_51Pc8WRJhzVL29jxApt2VuvLRrvlNvdJV1mb1VKbwj3rWvwYnVvCWQl1YLOVTYYMhRO71sd3i33zcS0KOYY0xYjfQ00pr79dNqn', // Replace with your live key
+  }
+};
+
+// Get current config based on environment
+const stripeConfig = STRIPE_CONFIG[STRIPE_ENV];
+
+// Log environment (remove in production if desired)
+console.log(`💳 Stripe running in ${STRIPE_ENV.toUpperCase()} mode`);
+
 const PRICING = {
   tier1: { name: 'Insight Overview', price: 29 },
   tier2: { name: 'Complete Reading', price: 49 },

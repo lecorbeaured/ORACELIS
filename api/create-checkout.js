@@ -1,7 +1,32 @@
 // api/create-checkout.js
 // Creates a Stripe checkout session with user metadata
 
+/**
+ * ENVIRONMENT SETUP
+ * 
+ * In Vercel, set these environment variables:
+ * 
+ * For TEST mode:
+ *   STRIPE_SECRET_KEY = sk_test_xxxxx
+ *   STRIPE_PRICE_TIER1 = price_test_xxxxx
+ *   STRIPE_PRICE_TIER2 = price_test_xxxxx
+ *   STRIPE_PRICE_UPGRADE = price_test_xxxxx
+ * 
+ * For LIVE mode:
+ *   STRIPE_SECRET_KEY = sk_live_xxxxx
+ *   STRIPE_PRICE_TIER1 = price_live_xxxxx
+ *   STRIPE_PRICE_TIER2 = price_live_xxxxx
+ *   STRIPE_PRICE_UPGRADE = price_live_xxxxx
+ * 
+ * TIP: Use Vercel's Preview vs Production environment variables
+ *      to automatically switch between test and live modes.
+ */
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+// Log mode on cold start (helps with debugging)
+const isTestMode = process.env.STRIPE_SECRET_KEY?.startsWith('sk_test');
+console.log(`💳 Stripe API running in ${isTestMode ? 'TEST' : 'LIVE'} mode`);
 
 const PRICES = {
   tier1: process.env.STRIPE_PRICE_TIER1,

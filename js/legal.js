@@ -17,7 +17,7 @@ const legalContent = {
     
     <h3>Send a Message</h3>
     <form class="contact-form" id="contact-form" onsubmit="handleContactSubmit(event)">
-      <input type="hidden" name="access_key" value="adca3f09-d5f7-4d5a-aedb-c4a0b9a7ca01">
+      <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
       <input type="hidden" name="subject" value="New ORACELIS Contact Form Submission">
       <input type="hidden" name="from_name" value="ORACELIS Contact Form">
       <input type="checkbox" name="botcheck" class="hidden" style="display:none !important;">

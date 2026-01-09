@@ -4,7 +4,7 @@
  * ENVIRONMENT TOGGLE
  * Set to 'test' for testing, 'live' for production
  */
-const STRIPE_ENV = 'test'; // Change to 'live' for production
+const STRIPE_ENV = 'live'; // Change to 'live' for production
 
 const STRIPE_CONFIG = {
   test: {

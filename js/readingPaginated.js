@@ -389,7 +389,7 @@ function setupEventListeners() {
     handlePrint();
   });
   document.getElementById('exit-close-btn').addEventListener('click', () => {
-    document.getElementById('exit-popup').style.display = 'none';
+    window.location.href = 'index.html';
   });
   
   // Keyboard navigation

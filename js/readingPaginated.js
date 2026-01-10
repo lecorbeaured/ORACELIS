@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
   createStarField();
   loadReading();
   setupEventListeners();
-  setupExitIntent();
+  // Exit intent removed - we now send reading to email
 });
 
 function createStarField() {
@@ -58,7 +58,7 @@ async function loadReading() {
         // Store for potential upgrades
         window.readingUserData = { name: userName, dob, version };
         
-        return initializeReading(dob, version);
+        return initializeReading(dob, version, null); // No email for paid users
       }
     } catch (e) {
       console.error('Token verification failed:', e);
@@ -68,21 +68,22 @@ async function loadReading() {
   // Fallback to URL params (free tier or local testing)
   userName = params.get('name') || 'Seeker';
   const dob = params.get('dob');
+  const email = params.get('email');
   userTier = params.get('tier') || 'free';
   const version = parseInt(params.get('v')) || getRandomVersion();
   
   // Store for potential upgrades
-  window.readingUserData = { name: userName, dob, version };
+  window.readingUserData = { name: userName, dob, version, email };
   
   if (!dob) {
     showError('Missing birth date');
     return;
   }
   
-  initializeReading(dob, version);
+  initializeReading(dob, version, email);
 }
 
-function initializeReading(dob, version) {
+function initializeReading(dob, version, email) {
   if (!dob) {
     showError('Missing birth date');
     return;
@@ -94,6 +95,9 @@ function initializeReading(dob, version) {
     showError('Could not generate your reading');
     return;
   }
+  
+  // Store node for email
+  const nodeSign = nodes.northNode;
   
   // Get reading content
   const reading = getNodeReading(nodes.northNode, version);
@@ -135,6 +139,55 @@ function initializeReading(dob, version) {
   // Track
   if (typeof trackReadingView === 'function') {
     trackReadingView(userTier, 'reading');
+  }
+  
+  // Send reading to email (free tier only, in background)
+  if (email && userTier === 'free') {
+    sendReadingToEmail(email, dob, nodeSign);
+  }
+}
+
+async function sendReadingToEmail(email, dob, nodeSign) {
+  try {
+    // Collect free pages content for email
+    const freePages = pages.filter(p => p.tier === 'free');
+    const readingContent = freePages.map(p => `<h3 style="color: #d4a574; margin: 20px 0 10px;">${p.title}</h3>\n${p.content}`).join('\n\n');
+    const readingTitle = pages[0]?.title || 'Your Soul Reading';
+    
+    const response = await fetch('/api/send-reading', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: userName,
+        email,
+        dob,
+        readingTitle,
+        readingContent,
+        nodeSign: nodeSign.charAt(0).toUpperCase() + nodeSign.slice(1)
+      })
+    });
+    
+    if (response.ok) {
+      showEmailConfirmation();
+    }
+  } catch (error) {
+    console.error('Failed to send email:', error);
+    // Fail silently - user still has reading on screen
+  }
+}
+
+function showEmailConfirmation() {
+  const badge = document.getElementById('node-badge');
+  if (badge) {
+    const originalText = badge.textContent;
+    badge.innerHTML = '✓ Reading sent to your email';
+    badge.style.color = '#7dd87d';
+    
+    // Revert after 4 seconds
+    setTimeout(() => {
+      badge.textContent = originalText;
+      badge.style.color = '';
+    }, 4000);
   }
 }
 
@@ -382,15 +435,8 @@ function setupEventListeners() {
     }
   });
   
-  // Print buttons
+  // Print button
   document.getElementById('print-btn').addEventListener('click', handlePrint);
-  document.getElementById('exit-print-btn').addEventListener('click', () => {
-    document.getElementById('exit-popup').style.display = 'none';
-    handlePrint();
-  });
-  document.getElementById('exit-close-btn').addEventListener('click', () => {
-    window.location.href = 'index.html';
-  });
   
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
@@ -398,29 +444,6 @@ function setupEventListeners() {
       showPage(currentPage - 1);
     } else if (e.key === 'ArrowRight' && currentPage < pages.length - 1) {
       showPage(currentPage + 1);
-    }
-  });
-}
-
-function setupExitIntent() {
-  let hasShownPopup = false;
-  
-  document.addEventListener('mouseout', (e) => {
-    if (e.clientY < 10 && !hasShownPopup) {
-      hasShownPopup = true;
-      document.getElementById('exit-popup').style.display = 'flex';
-      if (typeof trackExitIntent === 'function') trackExitIntent();
-    }
-  });
-  
-  // Also show on window blur (mobile/tab switch)
-  window.addEventListener('blur', () => {
-    if (!hasShownPopup) {
-      hasShownPopup = true;
-      setTimeout(() => {
-        document.getElementById('exit-popup').style.display = 'flex';
-        if (typeof trackExitIntent === 'function') trackExitIntent();
-      }, 500);
     }
   });
 }

@@ -8,6 +8,7 @@
     "start": "vercel dev"
   },
   "dependencies": {
-    "stripe": "^14.0.0"
+    "stripe": "^14.0.0",
+    "resend": "^2.0.0"
   }
 }

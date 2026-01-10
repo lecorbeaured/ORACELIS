@@ -176,11 +176,13 @@ function handleFormSubmit(e) {
   const form = e.target;
   const firstName = form.querySelector('#firstName').value.trim();
   const dateOfBirth = form.querySelector('#dateOfBirth').value;
-  const timeOfBirth = form.querySelector('#timeOfBirth').value;
+  const email = form.querySelector('#email').value.trim();
   
   let isValid = true;
   if (!firstName) { showError('firstName', 'Please enter your first name'); isValid = false; }
   if (!dateOfBirth) { showError('dateOfBirth', 'Please enter your date of birth'); isValid = false; }
+  if (!email) { showError('email', 'Please enter your email'); isValid = false; }
+  else if (!isValidEmail(email)) { showError('email', 'Please enter a valid email'); isValid = false; }
   if (!isValid) return;
   
   // Check rate limit
@@ -191,7 +193,7 @@ function handleFormSubmit(e) {
   }
   
   // Track form submission
-  if (typeof trackFormSubmit === 'function') trackFormSubmit(!!timeOfBirth);
+  if (typeof trackFormSubmit === 'function') trackFormSubmit(true);
   
   // Record this reading attempt
   recordReading();
@@ -200,8 +202,12 @@ function handleFormSubmit(e) {
   submitBtn.disabled = true;
   submitBtn.innerHTML = 'Preparing...<span class="loading-spinner"></span>';
   
-  window.pendingReadingData = { firstName, dateOfBirth, timeOfBirth };
+  window.pendingReadingData = { firstName, dateOfBirth, email };
   showTimer();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function showRateLimitError(message) {
@@ -304,7 +310,13 @@ function openReading() {
   const data = window.pendingReadingData;
   if (!data) return;
   const version = Math.floor(Math.random() * 3) + 1;
-  const params = new URLSearchParams({ name: data.firstName, dob: data.dateOfBirth, tier: 'free', v: version });
+  const params = new URLSearchParams({ 
+    name: data.firstName, 
+    dob: data.dateOfBirth, 
+    email: data.email,
+    tier: 'free', 
+    v: version 
+  });
   const url = `reading.html?${params}`;
   const win = window.open(url, '_blank', 'width=800,height=700');
   if (win) win.focus(); else window.location.href = url;

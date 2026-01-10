@@ -413,73 +413,32 @@
   cursor: not-allowed;
 }
 
-/* Print Reminder */
-.print-reminder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-lg);
-  background: rgba(212, 165, 116, 0.1);
-  border-top: 1px solid rgba(212, 165, 116, 0.2);
-  font-size: 0.85rem;
-  color: var(--gold-shimmer);
-  flex-wrap: wrap;
-}
-
-.print-btn-small {
-  background: transparent;
-  border: 1px solid var(--gold-shimmer);
-  color: var(--gold-shimmer);
-  padding: 0.3rem 0.8rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.print-btn-small:hover {
-  background: var(--gold-shimmer);
-  color: var(--midnight);
-}
-
-/* Exit Popup */
-.exit-popup {
+/* Subtle Print Button */
+.print-btn-subtle {
   position: fixed;
-  inset: 0;
-  background: rgba(10, 10, 18, 0.9);
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  background: rgba(18, 18, 31, 0.8);
+  border: 1px solid rgba(200, 197, 214, 0.2);
+  border-radius: 50%;
+  color: var(--moonbeam);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: var(--space-md);
+  transition: all 0.3s ease;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+  opacity: 0.7;
 }
 
-.exit-popup-content {
-  background: var(--cosmic-purple);
-  border: 1px solid rgba(212, 165, 116, 0.3);
-  border-radius: 16px;
-  padding: var(--space-xl);
-  max-width: 400px;
-  text-align: center;
-}
-
-.exit-popup-content h3 {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
+.print-btn-subtle:hover {
+  opacity: 1;
+  border-color: var(--gold-shimmer);
   color: var(--gold-shimmer);
-  margin-bottom: var(--space-sm);
-}
-
-.exit-popup-content p {
-  color: var(--moonbeam);
-  margin-bottom: var(--space-lg);
-}
-
-.exit-popup-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+  transform: scale(1.05);
 }
 
 /* Print View */
@@ -643,12 +602,10 @@
     font-size: 0.85rem;
   }
   
-  .print-reminder {
-    font-size: 0.75rem;
-    padding: var(--space-xs) var(--space-md);
-  }
-  
-  .print-reminder span {
-    display: none;
+  .print-btn-subtle {
+    bottom: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
   }
 }

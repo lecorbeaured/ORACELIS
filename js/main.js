@@ -270,7 +270,7 @@ function showTimer() {
     if (progress >= 1) {
       clearInterval(timerInterval);
       clearInterval(particleInterval);
-      setTimeout(() => { openReading(); hideTimer(); }, 500);
+      setTimeout(() => { openReading(); }, 500);
     }
   }, 50);
   

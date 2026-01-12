@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     const { data, error } = await resend.emails.send({
       from: 'ORACELIS <readings@oracelis.app>',
       to: email,
-      subject: `${name}, Your ORACELIS Soul Reading is Ready ✦`,
+      subject: `${name}, Your ORACELIS Reading is Ready`,
       html: htmlContent
     });
 
@@ -92,15 +92,6 @@ function generateEmailHTML(name, readingTitle, readingContent, nodeSign) {
                 Your soul reading has been prepared based on your unique cosmic blueprint. 
                 Below is your personalized reading: <strong style="color: #d4a574;">${readingTitle}</strong>
               </p>
-            </td>
-          </tr>
-          
-          <!-- Reading Badge -->
-          <tr>
-            <td align="center" style="padding: 30px 0 20px;">
-              <span style="display: inline-block; background: rgba(212,165,116,0.15); border: 1px solid rgba(212,165,116,0.4); border-radius: 50px; padding: 8px 20px; color: #d4a574; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;">
-                ✦ ${nodeSign} Reading ✦
-              </span>
             </td>
           </tr>
           

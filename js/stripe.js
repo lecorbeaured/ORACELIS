@@ -39,6 +39,7 @@ async function openCheckout(tier) {
         tier,
         name: userData.name || 'Guest',
         dob: userData.dob || '',
+        email: userData.email || '',
         version: userData.version || '1'
       })
     });

@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { name, email, dob, readingTitle, readingContent, nodeSign } = req.body;
+    const { name, email, dob, tier, readingTitle, readingContent, nodeSign } = req.body;
 
     // Validate
     if (!email || !name || !readingContent) {
@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
     }
 
     // Format the reading content for email
-    const htmlContent = generateEmailHTML(name, readingTitle, readingContent, nodeSign);
+    const htmlContent = generateEmailHTML(name, readingTitle, readingContent, tier || 'free');
 
     // Send email via Resend
     const { data, error } = await resend.emails.send({
@@ -61,7 +61,52 @@ module.exports = async (req, res) => {
   }
 };
 
-function generateEmailHTML(name, readingTitle, readingContent, nodeSign) {
+function generateEmailHTML(name, readingTitle, readingContent, tier) {
+  // Customize CTA based on tier
+  let ctaSection = '';
+  
+  if (tier === 'free') {
+    ctaSection = `
+          <!-- Upgrade CTA -->
+          <tr>
+            <td align="center" style="padding: 40px 0;">
+              <p style="color: #c8c5d6; font-size: 14px; margin: 0 0 20px;">
+                This is your free preview. Unlock your complete soul reading for deeper insights.
+              </p>
+              <a href="https://oracelis.app" style="display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); color: #0a0a12; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;">
+                Unlock Complete Reading →
+              </a>
+            </td>
+          </tr>`;
+  } else if (tier === 'tier1') {
+    ctaSection = `
+          <!-- Upgrade CTA -->
+          <tr>
+            <td align="center" style="padding: 40px 0;">
+              <p style="color: #c8c5d6; font-size: 14px; margin: 0 0 20px;">
+                Ready for even deeper insights? Upgrade to unlock your complete soul journey.
+              </p>
+              <a href="https://oracelis.app" style="display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); color: #0a0a12; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;">
+                Unlock Full Journey →
+              </a>
+            </td>
+          </tr>`;
+  } else {
+    // tier2 - full access, thank you message instead
+    ctaSection = `
+          <!-- Thank You -->
+          <tr>
+            <td align="center" style="padding: 40px 0;">
+              <p style="color: #d4a574; font-size: 16px; margin: 0;">
+                ✦ Thank you for your purchase ✦
+              </p>
+              <p style="color: #c8c5d6; font-size: 14px; margin: 10px 0 0;">
+                This is your complete soul reading. Save this email to revisit your insights anytime.
+              </p>
+            </td>
+          </tr>`;
+  }
+
   return `
 <!DOCTYPE html>
 <html>
@@ -97,24 +142,14 @@ function generateEmailHTML(name, readingTitle, readingContent, nodeSign) {
           
           <!-- Reading Content -->
           <tr>
-            <td style="background: rgba(255,255,255,0.02); border: 1px solid rgba(200,197,214,0.1); border-radius: 12px; padding: 30px;">
+            <td style="background: rgba(255,255,255,0.02); border: 1px solid rgba(200,197,214,0.1); border-radius: 12px; padding: 30px; margin-top: 20px;">
               <div style="color: #c8c5d6; font-size: 16px; line-height: 1.9;">
                 ${readingContent.replace(/\n/g, '<br><br>')}
               </div>
             </td>
           </tr>
           
-          <!-- Upgrade CTA -->
-          <tr>
-            <td align="center" style="padding: 40px 0;">
-              <p style="color: #c8c5d6; font-size: 14px; margin: 0 0 20px;">
-                This is your free preview. Unlock your complete soul reading for deeper insights.
-              </p>
-              <a href="https://oracelis.app" style="display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); color: #0a0a12; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;">
-                Unlock Complete Reading →
-              </a>
-            </td>
-          </tr>
+          ${ctaSection}
           
           <!-- Footer -->
           <tr>

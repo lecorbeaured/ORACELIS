@@ -37,13 +37,14 @@ module.exports = async (req, res) => {
     }
 
     // Get user data from metadata
-    const { tier, name, dob, version } = session.metadata;
+    const { tier, name, dob, email, version } = session.metadata;
 
     // Generate signed token
     const token = generateToken({
       tier,
       name,
       dob,
+      email,
       version,
       sessionId
     });

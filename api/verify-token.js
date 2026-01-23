@@ -60,6 +60,7 @@ module.exports = async (req, res) => {
     tier: result.data.tier,
     name: result.data.name,
     dob: result.data.dob,
+    email: result.data.email,
     version: result.data.version
   });
 };

@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { tier, name, dob, version } = req.body;
+    const { tier, name, dob, email, version } = req.body;
 
     // Validate
     if (!tier || !PRICES[tier]) {
@@ -70,6 +70,7 @@ module.exports = async (req, res) => {
         tier: tier === 'upgrade' ? 'tier2' : tier,
         name,
         dob,
+        email: email || '',
         version: version || '1'
       }
     });

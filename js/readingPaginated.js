@@ -53,12 +53,13 @@ async function loadReading() {
         userName = data.name || 'Seeker';
         userTier = data.tier || 'free';
         const dob = data.dob;
+        const email = data.email || null;
         const version = parseInt(data.version) || getRandomVersion();
         
         // Store for potential upgrades
-        window.readingUserData = { name: userName, dob, version };
+        window.readingUserData = { name: userName, dob, email, version };
         
-        return initializeReading(dob, version, null); // No email for paid users
+        return initializeReading(dob, version, email);
       }
     } catch (e) {
       console.error('Token verification failed:', e);
@@ -141,17 +142,28 @@ function initializeReading(dob, version, email) {
     trackReadingView(userTier, 'reading');
   }
   
-  // Send reading to email (free tier only, in background)
-  if (email && userTier === 'free') {
-    sendReadingToEmail(email, dob, nodeSign);
+  // Send reading to email (all tiers, in background)
+  if (email) {
+    sendReadingToEmail(email, dob, nodeSign, userTier);
   }
 }
 
-async function sendReadingToEmail(email, dob, nodeSign) {
+async function sendReadingToEmail(email, dob, nodeSign, tier) {
   try {
-    // Collect free pages content for email
-    const freePages = pages.filter(p => p.tier === 'free');
-    const readingContent = freePages.map(p => `<h3 style="color: #d4a574; margin: 20px 0 10px;">${p.title}</h3>\n${p.content}`).join('\n\n');
+    // Collect pages based on tier
+    let accessiblePages;
+    if (tier === 'tier2') {
+      // Full access - all pages
+      accessiblePages = pages;
+    } else if (tier === 'tier1') {
+      // Tier 1 - free + tier1 pages
+      accessiblePages = pages.filter(p => p.tier === 'free' || p.tier === 'tier1');
+    } else {
+      // Free - only free pages
+      accessiblePages = pages.filter(p => p.tier === 'free');
+    }
+    
+    const readingContent = accessiblePages.map(p => `<h3 style="color: #d4a574; margin: 20px 0 10px;">${p.title}</h3>\n${p.content}`).join('\n\n');
     const readingTitle = pages[0]?.title || 'Your Soul Reading';
     
     const response = await fetch('/api/send-reading', {
@@ -161,6 +173,7 @@ async function sendReadingToEmail(email, dob, nodeSign) {
         name: userName,
         email,
         dob,
+        tier,
         readingTitle,
         readingContent,
         nodeSign: nodeSign.charAt(0).toUpperCase() + nodeSign.slice(1)

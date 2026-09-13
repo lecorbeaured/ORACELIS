@@ -1,31 +1,11 @@
 /**
  * ORACELIS Stripe Integration
- * 
- * ENVIRONMENT TOGGLE
- * Set to 'test' for testing, 'live' for production
+ *
+ * Checkout is entirely server-driven: this just posts to /api/create-checkout
+ * and redirects to the session URL Stripe returns, so no publishable key or
+ * live/test toggle is needed client-side — the real mode is determined by
+ * which STRIPE_SECRET_KEY is set in Vercel (see api/create-checkout.js).
  */
-const STRIPE_ENV = 'test'; // Change to 'live' for production
-
-const STRIPE_CONFIG = {
-  test: {
-    publishableKey: 'pk_test_XXXXXXXXXXXXXXXXXXXXXXXX', // Replace with your test key
-  },
-  live: {
-    publishableKey: 'pk_live_XXXXXXXXXXXXXXXXXXXXXXXX', // Replace with your live key
-  }
-};
-
-// Get current config based on environment
-const stripeConfig = STRIPE_CONFIG[STRIPE_ENV];
-
-// Log environment (remove in production if desired)
-console.log(`💳 Stripe running in ${STRIPE_ENV.toUpperCase()} mode`);
-
-const PRICING = {
-  tier1: { name: 'Insight Overview', price: 29 },
-  tier2: { name: 'Complete Reading', price: 49 },
-  upgrade: { name: 'Upgrade to Complete', price: 20 }
-};
 
 async function openCheckout(tier) {
   // Get stored user data

@@ -70,8 +70,8 @@ async function loadReading() {
         
         // Store for potential upgrades
         window.readingUserData = { name: userName, dob, email, version };
-        
-        return initializeReading(dob, version, email);
+
+        return initializeReading(dob, version, email, token);
       }
     } catch (e) {
       console.error('Token verification failed:', e);
@@ -93,10 +93,10 @@ async function loadReading() {
     return;
   }
   
-  initializeReading(dob, version, email);
+  initializeReading(dob, version, email, null);
 }
 
-function initializeReading(dob, version, email) {
+function initializeReading(dob, version, email, token) {
   if (!dob) {
     showError('Missing birth date');
     return;
@@ -149,21 +149,30 @@ function initializeReading(dob, version, email) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('reading-modal').style.display = 'flex';
   
-  // Show first page
-  showPage(0);
-  
+  // Show the first page — unless this visit came from an email's "unlock"
+  // link (?goto=paywall), in which case skip straight to the first locked
+  // page instead of making them click back through content they already
+  // read in the email.
+  const startParams = new URLSearchParams(window.location.search);
+  if (startParams.get('goto') === 'paywall') {
+    const firstLockedIndex = pages.findIndex(p => isPageLocked(p.tier));
+    showPage(firstLockedIndex !== -1 ? firstLockedIndex : 0);
+  } else {
+    showPage(0);
+  }
+
   // Track
   if (typeof trackReadingView === 'function') {
     trackReadingView(userTier, 'reading');
   }
-  
+
   // Send reading to email (all tiers, in background)
   if (email) {
-    sendReadingToEmail(email, dob, nodeSign, userTier);
+    sendReadingToEmail(email, dob, nodeSign, userTier, version, token);
   }
 }
 
-async function sendReadingToEmail(email, dob, nodeSign, tier) {
+async function sendReadingToEmail(email, dob, nodeSign, tier, version, token) {
   try {
     // Collect pages based on tier
     let accessiblePages;
@@ -191,6 +200,8 @@ async function sendReadingToEmail(email, dob, nodeSign, tier) {
         email,
         dob,
         tier,
+        version,
+        token: token || undefined,
         pages: emailPages,
         nodeSign: nodeSign.charAt(0).toUpperCase() + nodeSign.slice(1)
       })

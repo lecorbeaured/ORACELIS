@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { name, email, dob, tier, pages, nodeSign } = req.body;
+    const { name, email, dob, tier, pages, nodeSign, version, token } = req.body;
 
     // Validate
     if (!email || !name || !Array.isArray(pages) || pages.length === 0) {
@@ -75,8 +75,15 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid reading content' });
     }
 
+    // Build the link the CTA button actually sends people back to. Free
+    // readings aren't behind a credential, so name/dob/version reconstruct
+    // the exact same reading; a tier1 reading IS behind one (the signed
+    // token issued at purchase), so that's what carries them back in
+    // still-unlocked rather than resetting them to the free tier.
+    const unlockUrl = buildUnlockUrl({ tier: tier || 'free', name, dob, version, token });
+
     // Format the reading content for email
-    const htmlContent = generateEmailHTML(name, safePages, tier || 'free');
+    const htmlContent = generateEmailHTML(name, safePages, tier || 'free', unlockUrl);
     const safeSubjectName = String(name).replace(/[\r\n]/g, '').slice(0, 100);
 
     // Send email via Resend
@@ -121,7 +128,35 @@ module.exports = async (req, res) => {
   }
 };
 
-function generateEmailHTML(name, pages, tier) {
+// Where the CTA button actually points. A free reading has no credential,
+// so we rebuild the same reading from its own name/dob/version. A tier1
+// reading is only still "unlocked" via its signed token, so that's what
+// has to carry the person back in rather than a dob/name pair the
+// paywall would treat as a brand-new, un-paid visitor.
+function buildUnlockUrl({ tier, name, dob, version, token }) {
+  const base = 'https://oracelis.app/reading.html';
+
+  if (tier === 'tier1' && typeof token === 'string' && token.includes('.')) {
+    return `${base}?token=${encodeURIComponent(token)}&goto=paywall`;
+  }
+
+  if (dob) {
+    const params = new URLSearchParams({
+      name: name || 'Seeker',
+      dob,
+      tier: 'free',
+      v: String(version || 1),
+      goto: 'paywall'
+    });
+    return `${base}?${params.toString()}`;
+  }
+
+  // Missing what we need to rebuild the reading — fall back to the homepage
+  // rather than link somewhere broken.
+  return 'https://oracelis.app';
+}
+
+function generateEmailHTML(name, pages, tier, unlockUrl) {
   const safeName = escapeHtml(name);
   const readingTitle = escapeHtml(pages[0]?.title || 'Your Soul Reading');
   const bodyHtml = pages
@@ -139,7 +174,7 @@ function generateEmailHTML(name, pages, tier) {
               <p style="color: #c8c5d6; font-size: 14px; margin: 0 0 20px;">
                 This is your free preview. Unlock your complete soul reading for deeper insights.
               </p>
-              <a href="https://oracelis.app" style="display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); color: #0a0a12; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;">
+              <a href="${unlockUrl}" style="display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); color: #0a0a12; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;">
                 Unlock Complete Reading →
               </a>
             </td>
@@ -152,7 +187,7 @@ function generateEmailHTML(name, pages, tier) {
               <p style="color: #c8c5d6; font-size: 14px; margin: 0 0 20px;">
                 Ready for even deeper insights? Upgrade to unlock your complete soul journey.
               </p>
-              <a href="https://oracelis.app" style="display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); color: #0a0a12; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;">
+              <a href="${unlockUrl}" style="display: inline-block; background: linear-gradient(135deg, #d4a574 0%, #c49a6c 100%); color: #0a0a12; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 0.05em;">
                 Unlock Full Journey →
               </a>
             </td>

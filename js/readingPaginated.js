@@ -34,6 +34,18 @@ function createStarField() {
   }
 }
 
+// Escape a value before it's ever placed into innerHTML. The user's own
+// first name is the one piece of user-supplied text that flows into the
+// reading content, so it must never be trusted as-is.
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function loadReading() {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
@@ -114,10 +126,13 @@ function initializeReading(dob, version, email) {
     pages = reading.pages;
   }
   
-  // Personalize content
+  // Personalize content. userName came from a URL param or a Stripe
+  // metadata field, both attacker-influenceable, so it's escaped before
+  // ever landing in content that gets rendered via innerHTML.
+  const safeName = escapeHtml(userName);
   pages = pages.map(page => ({
     ...page,
-    content: page.content.replace(/{NAME}/g, userName)
+    content: page.content.replace(/{NAME}/g, safeName)
   }));
   
   // Setup UI
@@ -163,9 +178,11 @@ async function sendReadingToEmail(email, dob, nodeSign, tier) {
       accessiblePages = pages.filter(p => p.tier === 'free');
     }
     
-    const readingContent = accessiblePages.map(p => `<h3 style="color: #d4a574; margin: 20px 0 10px;">${p.title}</h3>\n${p.content}`).join('\n\n');
-    const readingTitle = pages[0]?.title || 'Your Soul Reading';
-    
+    // Send raw title/content pairs, not pre-built HTML — the server escapes
+    // and formats them itself so a direct API call can't inject arbitrary
+    // markup into an email sent from our domain.
+    const emailPages = accessiblePages.map(p => ({ title: p.title, content: p.content }));
+
     const response = await fetch('/api/send-reading', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -174,8 +191,7 @@ async function sendReadingToEmail(email, dob, nodeSign, tier) {
         email,
         dob,
         tier,
-        readingTitle,
-        readingContent,
+        pages: emailPages,
         nodeSign: nodeSign.charAt(0).toUpperCase() + nodeSign.slice(1)
       })
     });
@@ -264,8 +280,30 @@ function showPage(index) {
   
   // Update content
   const contentEl = document.getElementById('page-content');
-  contentEl.innerHTML = formatContent(page.content);
-  
+  const isSoftPreview = !isLocked && page.tier === 'free' &&
+    index === getLastFreePageIndex() && index < pages.length - 1;
+
+  if (isSoftPreview) {
+    const previewText = getPreviewContent(page.content);
+    contentEl.innerHTML = `
+      <div class="content-fade-wrapper">${formatContent(previewText)}</div>
+      <div class="soft-lock-nudge">
+        <p class="soft-lock-nudge-text">Your reading continues — the rest unlocks with Insight Overview or the Complete Reading.</p>
+        <button type="button" class="btn btn-primary soft-lock-continue-btn" id="soft-lock-continue">Continue Reading →</button>
+      </div>
+    `;
+    if (typeof trackSoftPaywallView === 'function') trackSoftPaywallView(page.title);
+    const continueBtn = document.getElementById('soft-lock-continue');
+    if (continueBtn) {
+      continueBtn.addEventListener('click', () => {
+        if (typeof trackSoftPaywallClick === 'function') trackSoftPaywallClick(page.title);
+        showPage(currentPage + 1);
+      });
+    }
+  } else {
+    contentEl.innerHTML = formatContent(page.content);
+  }
+
   // Scroll to top of content
   document.querySelector('.reading-content-area').scrollTop = 0;
   
@@ -299,6 +337,21 @@ function showPage(index) {
   } else {
     nextBtn.innerHTML = 'Next <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>';
   }
+}
+
+// Index of the last page still on the free tier (the soft-preview teaser page)
+function getLastFreePageIndex() {
+  let lastIndex = -1;
+  pages.forEach((p, i) => { if (p.tier === 'free') lastIndex = i; });
+  return lastIndex;
+}
+
+// Trim a free page's content for the soft-preview teaser, keeping roughly half
+function getPreviewContent(fullText) {
+  const paragraphs = fullText.split('\n\n').filter(p => p.trim().length > 0);
+  if (paragraphs.length <= 2) return fullText; // too short to meaningfully trim
+  const keepCount = Math.max(2, Math.ceil(paragraphs.length * 0.5));
+  return paragraphs.slice(0, keepCount).join('\n\n');
 }
 
 function isPageLocked(tier) {

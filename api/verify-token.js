@@ -3,16 +3,16 @@
 
 const crypto = require('crypto');
 
-const SECRET = process.env.TOKEN_SECRET || 'oracelis-secret-key-change-me';
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
 
 // Verify and decode token
 function verifyToken(token) {
   try {
     const [payloadStr, signature] = token.split('.');
-    
+
     // Verify signature
     const expectedSig = crypto
-      .createHmac('sha256', SECRET)
+      .createHmac('sha256', TOKEN_SECRET)
       .update(payloadStr)
       .digest('base64url');
     
@@ -35,8 +35,15 @@ function verifyToken(token) {
 }
 
 module.exports = async (req, res) => {
+  // Fail closed: never fall back to a known/default secret. If this isn't
+  // configured, refuse to verify tokens instead of trusting a guessable one.
+  if (!TOKEN_SECRET) {
+    console.error('TOKEN_SECRET is not configured — refusing to verify tokens');
+    return res.status(500).json({ valid: false, tier: 'free', error: 'Server misconfigured' });
+  }
+
   let token;
-  
+
   if (req.method === 'GET') {
     token = req.query.token;
   } else if (req.method === 'POST') {

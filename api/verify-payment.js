@@ -4,7 +4,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const crypto = require('crypto');
 
-const SECRET = process.env.TOKEN_SECRET || 'oracelis-secret-key-change-me';
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
 
 // Generate signed token
 function generateToken(data) {
@@ -14,13 +14,20 @@ function generateToken(data) {
   };
   const payloadStr = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = crypto
-    .createHmac('sha256', SECRET)
+    .createHmac('sha256', TOKEN_SECRET)
     .update(payloadStr)
     .digest('base64url');
   return `${payloadStr}.${signature}`;
 }
 
 module.exports = async (req, res) => {
+  // Fail closed: never fall back to a known/default secret. If this isn't
+  // configured, refuse to issue tokens instead of minting ones anyone could forge.
+  if (!TOKEN_SECRET) {
+    console.error('TOKEN_SECRET is not configured — refusing to issue access tokens');
+    return res.status(500).send('Server misconfigured: missing TOKEN_SECRET');
+  }
+
   const sessionId = req.query.session_id;
 
   if (!sessionId) {

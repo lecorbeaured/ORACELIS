@@ -527,6 +527,68 @@ p { font-size: clamp(0.95rem, 2.5vw, 1.1rem); color: var(--moonbeam); }
 .payment-badge svg { color: var(--gold-shimmer); }
 
 /* ========================================
+   PRICING PREVIEW SECTION
+   ======================================== */
+.pricing-preview-section { padding: var(--space-2xl) 0; }
+
+.pricing-preview-header { text-align: center; margin-bottom: var(--space-xl); }
+.pricing-preview-title { font-size: clamp(1.5rem, 4vw, 2rem); color: var(--starlight); margin-bottom: var(--space-sm); }
+.pricing-preview-subtitle { color: var(--moonbeam); max-width: 520px; margin: 0 auto; }
+
+.pricing-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (min-width: 720px) { .pricing-preview-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.pricing-preview-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(200, 197, 214, 0.12);
+  border-radius: 14px;
+  padding: var(--space-lg);
+  text-align: center;
+  transition: all 0.3s var(--ease-in-out);
+}
+
+.pricing-preview-card:hover { border-color: rgba(212, 165, 116, 0.3); transform: translateY(-4px); }
+
+.pricing-preview-card.recommended {
+  border-color: var(--gold-shimmer);
+  background: rgba(212, 165, 116, 0.06);
+}
+
+.pricing-preview-badge {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold-shimmer);
+  color: var(--midnight);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.25rem 0.7rem;
+  border-radius: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pricing-preview-name { font-family: var(--font-display); font-size: 1.15rem; color: var(--starlight); margin-bottom: var(--space-xs); }
+.pricing-preview-price { font-family: var(--font-display); font-size: 2rem; color: var(--gold-shimmer); font-weight: 500; margin-bottom: var(--space-sm); }
+.pricing-preview-desc { font-size: 0.9rem; color: var(--moonbeam); line-height: 1.6; }
+
+.pricing-preview-note {
+  text-align: center;
+  color: var(--silver-dust);
+  font-size: 0.85rem;
+  margin-top: var(--space-lg);
+}
+
+/* ========================================
    FORM SECTION
    ======================================== */
 .form-section { padding: var(--space-2xl) 0; position: relative; }

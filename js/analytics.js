@@ -79,6 +79,26 @@ function trackUpgradeClick(tier, location) {
   }
 }
 
+// Track soft paywall preview shown (fade/teaser on the last free page)
+function trackSoftPaywallView(pageTitle) {
+  if (typeof gtag === 'function') {
+    gtag('event', 'soft_paywall_view', {
+      event_category: 'conversion',
+      page_title: pageTitle
+    });
+  }
+}
+
+// Track "Continue Reading" click from the soft paywall teaser
+function trackSoftPaywallClick(pageTitle) {
+  if (typeof gtag === 'function') {
+    gtag('event', 'soft_paywall_click', {
+      event_category: 'conversion',
+      page_title: pageTitle
+    });
+  }
+}
+
 // Track paywall declined
 function trackPaywallDeclined(tier) {
   if (typeof gtag === 'function') {

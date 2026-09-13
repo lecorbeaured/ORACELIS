@@ -81,7 +81,7 @@ Over time, this creates a gap—between who you know you could be and who you ar
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, life keeps guiding you toward lessons around meaning and commitment. You may have noticed that certain themes keep returning, often in different disguises.
 
 **Lesson 1: You do not need all the answers to choose a direction.**
@@ -413,7 +413,7 @@ This is what you are here to change.`
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They wear different disguises, but the core teaching is consistent.
 
 **Lesson 1: Simplicity Is Mastery**
@@ -783,7 +783,7 @@ This is what you are being invited to shift.`
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different contexts, but the core teaching is the same.
 
 **Lesson 1: Receiving Is a Form of Strength**
@@ -1158,7 +1158,7 @@ This is what you are being invited to shift.`
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: Your Opinion Matters**
@@ -1525,7 +1525,7 @@ This is what you are being invited to change.`
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different forms, but the teaching is consistent.
 
 **Lesson 1: Security Is Internal, Not External**
@@ -1892,7 +1892,7 @@ You know the depths. Now you are being invited to know the surface—and find it
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: Peace Is Not Weakness**
@@ -2257,7 +2257,7 @@ This is what you are being invited to change.`
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: You Cannot Pour From an Empty Cup**
@@ -2624,7 +2624,7 @@ You are being invited into something softer. Something more connected. Something
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: Feelings Are Not Weaknesses**
@@ -2989,7 +2989,7 @@ You are being invited into something more fulfilling. Something where your gifts
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: The Light Is Not About You**
@@ -3352,7 +3352,7 @@ You are being invited into something messier, riskier, and more alive.`
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: Understanding Is Not Experiencing**
@@ -3711,7 +3711,7 @@ You are being invited into something softer. Something that trusts the process, 
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: Imperfection Is Not Failure**
@@ -4068,7 +4068,7 @@ You are being invited into something more solid. Something that can hold all you
   },
   {
     title: "The Lessons Life Keeps Pushing You Toward",
-    tier: "free",
+    tier: "tier1",
     content: `{NAME}, certain lessons keep appearing in your life. They show up in different situations, but the teaching is consistent.
 
 **Lesson 1: You Have to Be Here**

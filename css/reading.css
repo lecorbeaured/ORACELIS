@@ -144,6 +144,42 @@
   font-weight: 500;
 }
 
+/* Soft Preview Fade + Nudge (teaser on the last free page) */
+.content-fade-wrapper {
+  position: relative;
+  padding-bottom: var(--space-sm);
+}
+
+.content-fade-wrapper::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 90px;
+  background: linear-gradient(to bottom, transparent, rgba(18, 18, 31, 0.98));
+  pointer-events: none;
+}
+
+.soft-lock-nudge {
+  text-align: center;
+  padding: var(--space-md) var(--space-sm) var(--space-sm);
+  border-top: 1px dashed rgba(212, 165, 116, 0.25);
+  margin-top: var(--space-sm);
+}
+
+.soft-lock-nudge-text {
+  color: var(--moonbeam);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-sm);
+  line-height: 1.5;
+}
+
+.soft-lock-continue-btn {
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9rem;
+}
+
 /* Locked Overlay */
 .locked-overlay {
   position: absolute;

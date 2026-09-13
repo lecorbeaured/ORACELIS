@@ -47,7 +47,7 @@ CONTACT_EMAIL=support@oracelis.app  # optional — where the contact form's noti
 
 ### 4. Update Google Analytics
 
-Replace `G-XXXXXXXXXX` in `index.html` with your GA4 Measurement ID. Note that `reading.html` does not currently load the GA script at all, so paywall/purchase events fire the `gtag` calls but silently no-op — add the same GA snippet there if you want funnel data past the landing page.
+Replace `G-XXXXXXXXXX` with your GA4 Measurement ID in **both** `index.html` and `reading.html` — the reading page now loads the same GA snippet as the landing page (it didn't before, so every paywall/purchase `gtag` event was silently no-op'ing past the landing page), so both copies of the placeholder need to match your real ID or funnel data will still be incomplete.
 
 ---
 

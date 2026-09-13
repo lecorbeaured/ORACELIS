@@ -37,31 +37,36 @@ const legalContent = {
       <li>Name (first name only)</li>
       <li>Date of birth</li>
       <li>Time of birth (optional)</li>
-      <li>Email address (if provided for contact)</li>
+      <li>Email address (to deliver your reading, and for contact form submissions)</li>
       <li>Payment information (processed securely by Stripe)</li>
     </ul>
-    
+
     <h3>How We Use Your Information</h3>
     <ul>
       <li>Generate your personalized reading</li>
+      <li>Deliver your reading and, if you don't unsubscribe, occasional future spiritual insights, by email</li>
       <li>Process payments securely</li>
       <li>Respond to support inquiries</li>
       <li>Improve our services</li>
     </ul>
-    
+
     <h3>Data Storage & Security</h3>
     <p>Your birth data is used only to generate your reading and is not permanently stored on our servers. Payment processing is handled securely by Stripe. We do not store credit card information.</p>
-    
+
     <h3>Cookies & Analytics</h3>
     <p>We use Google Analytics to understand how visitors use our site. This helps us improve our service. You can opt out of analytics tracking through your browser settings.</p>
-    
+
+    <h3>Email & Marketing</h3>
+    <p>Your reading is delivered to the email address you provide. That email address may also be added to our mailing list so we can send occasional future spiritual insights — you can unsubscribe at any time using the link in any marketing email. Your email is never sold or shared with third parties.</p>
+
     <h3>Third-Party Services</h3>
     <ul>
       <li><strong>Stripe:</strong> Payment processing</li>
       <li><strong>Google Analytics:</strong> Site analytics</li>
-      <li><strong>Netlify:</strong> Website hosting</li>
+      <li><strong>Resend:</strong> Delivering your reading by email and, if you don't unsubscribe, occasional marketing emails</li>
+      <li><strong>Vercel:</strong> Website hosting</li>
     </ul>
-    
+
     <h3>Your Rights</h3>
     <p>You have the right to:</p>
     <ul>
@@ -69,11 +74,11 @@ const legalContent = {
       <li>Request deletion of your data</li>
       <li>Opt out of marketing communications</li>
     </ul>
-    
+
     <h3>Contact</h3>
     <p>For privacy-related questions, contact us at <a href="mailto:support@oracelis.app">support@oracelis.app</a>.</p>
-    
-    <p class="last-updated">Last updated: January 2025</p>
+
+    <p class="last-updated">Last updated: September 2026</p>
   `,
   
   terms: `

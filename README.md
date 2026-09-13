@@ -70,8 +70,10 @@ oracelis/
 │   ├── stripe.js           # Payment integration
 │   └── analytics.js        # GA4 tracking
 └── api/
+    ├── _token.js           # Shared token encode/decode (AES-256-GCM); not a route (underscore-prefixed)
+    ├── _rateLimit.js        # Shared in-memory per-IP rate limiter; not a route (underscore-prefixed)
     ├── create-checkout.js  # Creates Stripe session
-    ├── verify-payment.js   # Verifies payment, issues token
+    ├── verify-payment.js   # Verifies payment, issues access token
     ├── verify-token.js     # Validates access token
     ├── send-reading.js     # Emails the reading via Resend, adds to Resend Audience
     └── contact.js          # Contact form handler — sends a notification via Resend to CONTACT_EMAIL (defaults to support@oracelis.app)
@@ -83,17 +85,17 @@ oracelis/
 2. Free pages shown: Core Theme in full, then a shortened preview of the next free page with a "Continue Reading" prompt
 3. User hits paywall → sees tier options
 4. Clicks upgrade → Stripe Checkout
-5. Payment success → `/api/verify-payment` verifies with Stripe, issues a signed token
+5. Payment success → `/api/verify-payment` verifies with Stripe, issues an access token
 6. Reading page verifies the token via `/api/verify-token` → unlocks paid content
 7. The reading is also emailed via Resend at every tier (free included); if `RESEND_AUDIENCE_ID` is set, the email is also added to that Resend Audience for follow-up marketing
 
 ## Security
 
 - Payments verified server-side via Stripe API
-- Access tokens are signed (HMAC-SHA256); `TOKEN_SECRET` must be set or token endpoints refuse to run
+- Access tokens are AES-256-GCM encrypted and authenticated (`api/_token.js`); `TOKEN_SECRET` must be set or token endpoints refuse to run. The GCM auth tag rejects any tampered token the same way the old HMAC signature did, and now the payload (name/DOB/email) is unreadable to anyone without `TOKEN_SECRET` — a leaked reading URL no longer exposes that data. Tokens issued before this change (2-part HMAC-signed-but-plaintext format) are still honored until they expire, so already-sent purchase emails keep working.
 - Tokens expire after 48 hours
 - No client-side tier manipulation possible
-- Token payloads are signed but not encrypted — a leaked reading URL can be decoded to read the name/DOB/email inside it. Worth encrypting if that PII exposure matters for your threat model.
+- `api/_rateLimit.js` adds a per-IP, in-memory rate limit to every API route (contact form: 5/hour, send-reading: 10/hour, create-checkout: 20/hour, verify-payment: 30/hour, verify-token: 60/hour) as a backstop behind the client-side checks, which anyone can bypass by clearing localStorage or calling the endpoint directly. This is best-effort, not a distributed limit — it resets on cold start and isn't shared across concurrent Vercel instances, so it stops casual/scripted abuse from one source but won't hold up under a coordinated attack. Swap in a shared store like Upstash Redis behind the same `rateLimit()` signature if you need airtight protection.
 - All user-supplied text (first name, and the reading content sent to `/api/send-reading`) is HTML-escaped before being placed into a page or email, so it can't be used to inject markup or scripts
 
 ## Tier Structure

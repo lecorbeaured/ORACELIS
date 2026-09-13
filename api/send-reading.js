@@ -2,6 +2,7 @@
 // Sends reading to user's email and stores email for marketing
 
 const { Resend } = require('resend');
+const { rateLimit } = require('./_rateLimit');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -50,6 +51,15 @@ function formatContentForEmail(text) {
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Unauthenticated and it costs a real Resend send each time, so cap it
+  // per IP — generous enough for someone generating a few readings for
+  // family, tight enough to stop a scripted flood.
+  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 10, keyPrefix: 'send-reading' });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(rl.retryAfterSec));
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
   try {

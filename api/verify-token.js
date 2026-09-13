@@ -1,38 +1,9 @@
 // api/verify-token.js
-// Verifies the signed token and returns user tier
+// Verifies the access token (encrypted+authenticated; see _token.js) and
+// returns the user's tier
 
-const crypto = require('crypto');
-
-const TOKEN_SECRET = process.env.TOKEN_SECRET;
-
-// Verify and decode token
-function verifyToken(token) {
-  try {
-    const [payloadStr, signature] = token.split('.');
-
-    // Verify signature
-    const expectedSig = crypto
-      .createHmac('sha256', TOKEN_SECRET)
-      .update(payloadStr)
-      .digest('base64url');
-    
-    if (signature !== expectedSig) {
-      return { valid: false, error: 'Invalid signature' };
-    }
-    
-    // Decode payload
-    const payload = JSON.parse(Buffer.from(payloadStr, 'base64url').toString());
-    
-    // Check expiry
-    if (payload.exp && Date.now() > payload.exp) {
-      return { valid: false, error: 'Token expired' };
-    }
-    
-    return { valid: true, data: payload };
-  } catch (e) {
-    return { valid: false, error: 'Invalid token format' };
-  }
-}
+const { decodeToken, TOKEN_SECRET } = require('./_token');
+const { rateLimit } = require('./_rateLimit');
 
 module.exports = async (req, res) => {
   // Fail closed: never fall back to a known/default secret. If this isn't
@@ -40,6 +11,14 @@ module.exports = async (req, res) => {
   if (!TOKEN_SECRET) {
     console.error('TOKEN_SECRET is not configured — refusing to verify tokens');
     return res.status(500).json({ valid: false, tier: 'free', error: 'Server misconfigured' });
+  }
+
+  // This is called once per reading-page load in normal use, so a
+  // generous cap only bites a script hammering the endpoint.
+  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 60, keyPrefix: 'verify-token' });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(rl.retryAfterSec));
+    return res.status(429).json({ valid: false, tier: 'free', error: 'Too many requests' });
   }
 
   let token;
@@ -56,7 +35,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ valid: false, tier: 'free' });
   }
 
-  const result = verifyToken(token);
+  const result = decodeToken(token);
 
   if (!result.valid) {
     return res.status(200).json({ valid: false, tier: 'free', error: result.error });

@@ -1,24 +1,10 @@
 // api/verify-payment.js
-// Verifies Stripe payment and redirects with signed token
+// Verifies Stripe payment and redirects with an access token (encrypted+
+// authenticated; see _token.js)
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const crypto = require('crypto');
-
-const TOKEN_SECRET = process.env.TOKEN_SECRET;
-
-// Generate signed token
-function generateToken(data) {
-  const payload = {
-    ...data,
-    exp: Date.now() + (48 * 60 * 60 * 1000) // 48 hour expiry
-  };
-  const payloadStr = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const signature = crypto
-    .createHmac('sha256', TOKEN_SECRET)
-    .update(payloadStr)
-    .digest('base64url');
-  return `${payloadStr}.${signature}`;
-}
+const { encodeToken, TOKEN_SECRET } = require('./_token');
+const { rateLimit } = require('./_rateLimit');
 
 module.exports = async (req, res) => {
   // Fail closed: never fall back to a known/default secret. If this isn't
@@ -26,6 +12,14 @@ module.exports = async (req, res) => {
   if (!TOKEN_SECRET) {
     console.error('TOKEN_SECRET is not configured — refusing to issue access tokens');
     return res.status(500).send('Server misconfigured: missing TOKEN_SECRET');
+  }
+
+  // Each real purchase hits this once via the Stripe redirect; a generous
+  // cap here just blunts someone scripting session_id guesses.
+  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 30, keyPrefix: 'verify-payment' });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(rl.retryAfterSec));
+    return res.status(429).send('Too many requests, please try again shortly.');
   }
 
   const sessionId = req.query.session_id;
@@ -46,8 +40,8 @@ module.exports = async (req, res) => {
     // Get user data from metadata
     const { tier, name, dob, email, version } = session.metadata;
 
-    // Generate signed token
-    const token = generateToken({
+    // Generate access token
+    const token = encodeToken({
       tier,
       name,
       dob,

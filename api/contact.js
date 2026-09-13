@@ -2,6 +2,7 @@
 // Handles contact form submissions — sends a notification via Resend
 
 const { Resend } = require('resend');
+const { rateLimit } = require('./_rateLimit');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -24,6 +25,15 @@ module.exports = async (req, res) => {
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // Server-side backstop behind the client-side localStorage check in
+  // legal.js, which anyone can bypass by clearing storage or calling this
+  // endpoint directly.
+  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 5, keyPrefix: 'contact' });
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(rl.retryAfterSec));
+    return res.status(429).json({ error: 'Too many messages. Please try again later.' });
   }
 
   try {

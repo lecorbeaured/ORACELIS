@@ -31,6 +31,7 @@ STRIPE_PRICE_UPGRADE=price_xxx   # $20 upgrade price ID
 TOKEN_SECRET=your-random-secret-key-min-32-chars
 RESEND_API_KEY=re_xxx            # required — sends the reading email
 RESEND_AUDIENCE_ID=c942e291-cf04-4e64-abb0-aaa66d7bcf59   # "ORACELIS Readings" audience — set in Vercel as of Sep 2026; without it, emails are sent but contacts are NOT saved to any Resend Audience
+CONTACT_EMAIL=support@oracelis.app  # optional — where the contact form's notification email goes; defaults to support@oracelis.app if unset
 ```
 
 `TOKEN_SECRET` is required in every environment. If it's missing, `/api/verify-payment` and `/api/verify-token` now refuse to issue or verify tokens rather than falling back to a default value — that fallback used to be a way to forge free access to paid tiers, so treat a "Server misconfigured" error there as a sign this variable isn't set.
@@ -73,7 +74,7 @@ oracelis/
     ├── verify-payment.js   # Verifies payment, issues token
     ├── verify-token.js     # Validates access token
     ├── send-reading.js     # Emails the reading via Resend, adds to Resend Audience
-    └── contact.js          # Contact form handler (not currently wired to the front-end form)
+    └── contact.js          # Contact form handler — sends a notification via Resend to CONTACT_EMAIL (defaults to support@oracelis.app)
 ```
 
 ## How It Works

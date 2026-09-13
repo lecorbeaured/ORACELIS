@@ -17,10 +17,8 @@ const legalContent = {
     
     <h3>Send a Message</h3>
     <form class="contact-form" id="contact-form" onsubmit="handleContactSubmit(event)">
-      <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY">
       <input type="hidden" name="subject" value="New ORACELIS Contact Form Submission">
-      <input type="hidden" name="from_name" value="ORACELIS Contact Form">
-      <input type="checkbox" name="botcheck" class="hidden" style="display:none !important;">
+      <input type="checkbox" name="botcheck" class="hidden" style="display:none !important;" tabindex="-1" autocomplete="off">
       <input type="text" name="name" placeholder="Your Name" required>
       <input type="email" name="email" placeholder="Your Email" required>
       <textarea name="message" placeholder="Your Message" required></textarea>
@@ -268,52 +266,52 @@ function recordContactSubmission() {
   } catch (e) {}
 }
 
-// Contact form handler - Web3Forms
+// Contact form handler - posts to our own /api/contact (Resend), same-origin
 async function handleContactSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const submitBtn = form.querySelector('button[type="submit"]');
   const statusDiv = document.getElementById('contact-status');
-  
+
   // Check honeypot (bot check)
   if (form.querySelector('input[name="botcheck"]').checked) {
     return; // Bot detected
   }
-  
+
   // Check rate limit
   const rateCheck = checkContactRateLimit();
   if (!rateCheck.allowed) {
     statusDiv.innerHTML = `<p style="color: #ff9999; font-size: 0.85rem; margin-top: 0.5rem;">${rateCheck.message}</p>`;
     return;
   }
-  
+
   // Disable button and show loading
   submitBtn.disabled = true;
   submitBtn.textContent = 'Sending...';
   statusDiv.innerHTML = '';
-  
+
   try {
     const formData = new FormData(form);
-    const object = Object.fromEntries(formData);
-    delete object.botcheck; // Remove honeypot from submission
-    const json = JSON.stringify(object);
-    
-    const response = await fetch('https://api.web3forms.com/submit', {
+    const payload = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      subject: formData.get('subject'),
+      message: formData.get('message')
+    };
+
+    const response = await fetch('/api/contact', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: json
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
-    
+
     const data = await response.json();
-    
-    if (data.success) {
+
+    if (response.ok && data.success) {
       recordContactSubmission();
       form.innerHTML = '<p style="color: var(--gold-shimmer); text-align: center;">✓ Thank you! Your message has been sent. We\'ll get back to you soon.</p>';
     } else {
-      throw new Error(data.message || 'Failed to send message');
+      throw new Error(data.error || 'Failed to send message');
     }
   } catch (error) {
     console.error('Contact form error:', error);

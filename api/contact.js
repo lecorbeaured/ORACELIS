@@ -1,5 +1,24 @@
 // api/contact.js
-// Handles contact form submissions
+// Handles contact form submissions — sends a notification via Resend
+
+const { Resend } = require('resend');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const MAX_NAME_LENGTH = 100;
+const MAX_SUBJECT_LENGTH = 200;
+const MAX_MESSAGE_LENGTH = 5000;
+
+// Escape before interpolating into the notification email — this endpoint
+// has no auth, so nothing from the request body is trusted as markup.
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 module.exports = async (req, res) => {
   // Only allow POST
@@ -21,42 +40,36 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // Option 1: Send via email service (Resend, SendGrid, etc.)
-    // Uncomment and configure if using Resend:
-    /*
-    const { Resend } = require('resend');
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    
-    await resend.emails.send({
+    // Cap lengths — this endpoint is unauthenticated, so never trust size
+    const safeName = String(name).slice(0, MAX_NAME_LENGTH);
+    const safeSubject = subject ? String(subject).slice(0, MAX_SUBJECT_LENGTH) : 'New Message';
+    const safeMessage = String(message).slice(0, MAX_MESSAGE_LENGTH);
+
+    const { error } = await resend.emails.send({
       from: 'ORACELIS <noreply@oracelis.app>',
       to: process.env.CONTACT_EMAIL || 'support@oracelis.app',
-      subject: `[ORACELIS Contact] ${subject || 'New Message'}`,
+      replyTo: email,
+      subject: `[ORACELIS Contact] ${safeSubject}`,
       html: `
         <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject || 'N/A'}</p>
+        <p><strong>Name:</strong> ${escapeHtml(safeName)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(safeSubject)}</p>
         <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
+        <p>${escapeHtml(safeMessage).replace(/\n/g, '<br>')}</p>
       `
     });
-    */
 
-    // Option 2: Log to console (for testing/development)
-    console.log('Contact form submission:', {
-      name,
-      email,
-      subject: subject || 'N/A',
-      message,
-      timestamp: new Date().toISOString()
-    });
+    if (error) {
+      console.error('Resend error (contact form):', error);
+      return res.status(500).json({ error: 'Failed to send message' });
+    }
 
-    // Option 3: Store in database or external service
-    // Add your preferred storage method here
+    console.log('Contact form submission sent', { timestamp: new Date().toISOString() });
 
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Thank you for your message. We will get back to you soon.' 
+    return res.status(200).json({
+      success: true,
+      message: 'Thank you for your message. We will get back to you soon.'
     });
 
   } catch (error) {

@@ -70,24 +70,26 @@ oracelis/
 │   ├── stripe.js           # Payment integration
 │   └── analytics.js        # GA4 tracking
 └── api/
-    ├── _token.js           # Shared token encode/decode (AES-256-GCM); not a route (underscore-prefixed)
-    ├── _rateLimit.js        # Shared in-memory per-IP rate limiter; not a route (underscore-prefixed)
-    ├── create-checkout.js  # Creates Stripe session
-    ├── verify-payment.js   # Verifies payment, issues access token
-    ├── verify-token.js     # Validates access token
-    ├── send-reading.js     # Emails the reading via Resend, adds to Resend Audience
-    └── contact.js          # Contact form handler — sends a notification via Resend to CONTACT_EMAIL (defaults to support@oracelis.app)
+    ├── _token.js               # Shared token encode/decode (AES-256-GCM); not a route (underscore-prefixed)
+    ├── _rateLimit.js           # Shared in-memory per-IP rate limiter; not a route (underscore-prefixed)
+    ├── create-reading-token.js # Issues a free-tier access token (no payment involved) so the reading URL carries a token instead of raw name/dob/email
+    ├── create-checkout.js      # Creates Stripe session
+    ├── verify-payment.js       # Verifies payment, issues access token
+    ├── verify-token.js         # Validates access token
+    ├── send-reading.js         # Emails the reading via Resend, adds to Resend Audience
+    └── contact.js              # Contact form handler — sends a notification via Resend to CONTACT_EMAIL (defaults to support@oracelis.app)
 ```
 
 ## How It Works
 
 1. User enters name + birth date
-2. Free pages shown: Core Theme in full, then a shortened preview of the next free page with a "Continue Reading" prompt
-3. User hits paywall → sees tier options
-4. Clicks upgrade → Stripe Checkout
-5. Payment success → `/api/verify-payment` verifies with Stripe, issues an access token
-6. Reading page verifies the token via `/api/verify-token` → unlocks paid content
-7. The reading is also emailed via Resend at every tier (free included); if `RESEND_AUDIENCE_ID` is set, the email is also added to that Resend Audience for follow-up marketing
+2. `/api/create-reading-token` issues a signed, encrypted `tier: 'free'` access token for this reading — so the URL that opens is `reading.html?token=...` rather than `reading.html?name=...&dob=...&email=...`. If that call fails for any reason, the client falls back to the old raw-param URL rather than blocking the reading.
+3. Free pages shown: Core Theme in full, then a shortened preview of the next free page with a "Continue Reading" prompt
+4. User hits paywall → sees tier options
+5. Clicks upgrade → Stripe Checkout
+6. Payment success → `/api/verify-payment` verifies with Stripe, issues an access token
+7. Reading page verifies the token via `/api/verify-token` → unlocks paid content
+8. The reading is also emailed via Resend at every tier (free included); if `RESEND_AUDIENCE_ID` is set, the email is also added to that Resend Audience for follow-up marketing
 
 ## Security
 
@@ -95,7 +97,8 @@ oracelis/
 - Access tokens are AES-256-GCM encrypted and authenticated (`api/_token.js`); `TOKEN_SECRET` must be set or token endpoints refuse to run. The GCM auth tag rejects any tampered token the same way the old HMAC signature did, and now the payload (name/DOB/email) is unreadable to anyone without `TOKEN_SECRET` — a leaked reading URL no longer exposes that data. Tokens issued before this change (2-part HMAC-signed-but-plaintext format) are still honored until they expire, so already-sent purchase emails keep working.
 - Tokens expire after 48 hours
 - No client-side tier manipulation possible
-- `api/_rateLimit.js` adds a per-IP, in-memory rate limit to every API route (contact form: 5/hour, send-reading: 10/hour, create-checkout: 20/hour, verify-payment: 30/hour, verify-token: 60/hour) as a backstop behind the client-side checks, which anyone can bypass by clearing localStorage or calling the endpoint directly. This is best-effort, not a distributed limit — it resets on cold start and isn't shared across concurrent Vercel instances, so it stops casual/scripted abuse from one source but won't hold up under a coordinated attack. Swap in a shared store like Upstash Redis behind the same `rateLimit()` signature if you need airtight protection.
+- Free-tier readings are also opened via a token (`/api/create-reading-token`) rather than raw name/DOB/email query params, so a free reading's URL doesn't expose that data in browser history or if the link is forwarded/screenshotted — the same protection paid tiers already had. (This does mean a free reading link now expires after 48 hours too, matching paid links, where it previously never expired.)
+- `api/_rateLimit.js` adds a per-IP, in-memory rate limit to every API route (contact form: 5/hour, send-reading: 10/hour, create-checkout: 20/hour, create-reading-token: 20/hour, verify-payment: 30/hour, verify-token: 60/hour) as a backstop behind the client-side checks, which anyone can bypass by clearing localStorage or calling the endpoint directly. This is best-effort, not a distributed limit — it resets on cold start and isn't shared across concurrent Vercel instances, so it stops casual/scripted abuse from one source but won't hold up under a coordinated attack. Swap in a shared store like Upstash Redis behind the same `rateLimit()` signature if you need airtight protection.
 - All user-supplied text (first name, and the reading content sent to `/api/send-reading`) is HTML-escaped before being placed into a page or email, so it can't be used to inject markup or scripts
 
 ## Tier Structure

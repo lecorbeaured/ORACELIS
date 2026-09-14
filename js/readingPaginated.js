@@ -436,8 +436,8 @@ function updateLockedUI(requiredTier) {
 
 function handleMaybeLater() {
   // Track the decline
-  if (typeof gtag === 'function') {
-    gtag('event', 'paywall_declined', { event_category: 'conversion', tier: userTier });
+  if (typeof trackPaywallDeclined === 'function') {
+    trackPaywallDeclined(userTier);
   }
   
   // Find last free page
@@ -546,10 +546,12 @@ function handlePrint() {
                       (page.tier === 'tier2' && userTier === 'tier2');
     
     if (canAccess) {
-      const content = page.content.replace(/{NAME}/g, userName || 'Seeker');
-      // Convert markdown-style formatting to HTML
-      const formattedContent = formatContent(content);
-      
+      // page.content already has {NAME} substituted (with the name
+      // HTML-escaped) back in initializeReading(), so it doesn't need to be
+      // redone here — doing it again would also mean using the raw,
+      // unescaped userName, which is attacker-influenceable.
+      const formattedContent = formatContent(page.content);
+
       html += `
         <div class="print-content-section">
           <h3>${page.title}</h3>

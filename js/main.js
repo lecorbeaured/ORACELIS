@@ -306,18 +306,47 @@ function hideTimer() {
   currentPhase = -1;
 }
 
-function openReading() {
+async function openReading() {
   const data = window.pendingReadingData;
   if (!data) return;
   const version = Math.floor(Math.random() * 3) + 1;
-  const params = new URLSearchParams({ 
-    name: data.firstName, 
-    dob: data.dateOfBirth, 
-    email: data.email,
-    tier: 'free', 
-    v: version 
-  });
-  const url = `reading.html?${params}`;
+
+  // Get an opaque, encrypted token for this reading rather than putting the
+  // name/DOB/email straight in the URL — a raw-param link sits in browser
+  // history and can leak if forwarded or screenshotted.
+  let url;
+  try {
+    const response = await fetch('/api/create-reading-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: data.firstName,
+        dob: data.dateOfBirth,
+        email: data.email,
+        version
+      })
+    });
+    const result = await response.json();
+    if (response.ok && result.token) {
+      url = `reading.html?token=${encodeURIComponent(result.token)}`;
+    }
+  } catch (e) {
+    console.error('Failed to create reading token:', e);
+  }
+
+  // Don't let a token-service hiccup block the reading — fall back to the
+  // old raw-param URL rather than leaving the user stuck.
+  if (!url) {
+    const params = new URLSearchParams({
+      name: data.firstName,
+      dob: data.dateOfBirth,
+      email: data.email,
+      tier: 'free',
+      v: version
+    });
+    url = `reading.html?${params}`;
+  }
+
   const win = window.open(url, '_blank', 'width=800,height=700');
   if (win) win.focus(); else window.location.href = url;
   window.pendingReadingData = null;

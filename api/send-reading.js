@@ -130,6 +130,13 @@ module.exports = async (req, res) => {
       console.warn('RESEND_AUDIENCE_ID is not set — this email was sent but the contact was not saved to any Resend Audience.');
     }
 
+    // Schedule Day 3 / Day 7 follow-ups (free tier only). Never throws and
+    // is a no-op unless Upstash is configured, so the Day 1 flow is safe.
+    if (!tier || tier === 'free') {
+      const { scheduleFollowups } = require('./_followup');
+      await scheduleFollowups({ resend, email, name, unlockUrl });
+    }
+
     return res.status(200).json({ success: true, messageId: data?.id });
 
   } catch (error) {

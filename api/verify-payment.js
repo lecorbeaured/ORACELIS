@@ -3,8 +3,12 @@
 // authenticated; see _token.js)
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { Resend } = require('resend');
 const { encodeToken, TOKEN_SECRET } = require('./_token');
 const { rateLimit } = require('./_rateLimit');
+const { cancelFollowupPitch } = require('./_followup');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 module.exports = async (req, res) => {
   // Fail closed: never fall back to a known/default secret. If this isn't
@@ -54,6 +58,11 @@ module.exports = async (req, res) => {
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}` 
       : process.env.SITE_URL || 'http://localhost:3000';
+
+    // They just bought: cancel the scheduled Day 7 pitch so buyers never
+    // get pitched something they already own. Never throws; no-op unless
+    // Upstash is configured.
+    await cancelFollowupPitch({ resend, email });
 
     // Redirect to reading page with token
     return res.redirect(302, `${baseUrl}/reading.html?token=${token}`);

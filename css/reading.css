@@ -645,3 +645,26 @@
     height: 40px;
   }
 }
+
+/* ========================================
+   LIGHT REFRESH — Oct 18, 2026
+   Same palette, same fonts. Polish only.
+   ======================================== */
+
+/* Locked overlay: gold gradient fade instead of a flat cut,
+   lock content presented as a framed gold card */
+.locked-overlay {
+  background: linear-gradient(180deg,
+    rgba(10, 10, 18, 0.55) 0%,
+    rgba(10, 10, 18, 0.88) 50%,
+    rgba(10, 10, 18, 0.97) 100%);
+}
+.locked-content-box {
+  background: rgba(18, 18, 31, 0.6);
+  border: 1px solid rgba(212, 165, 116, 0.28);
+  border-radius: 16px;
+  padding: var(--space-xl);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 90px rgba(212, 165, 116, 0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

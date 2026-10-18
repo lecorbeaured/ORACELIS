@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 
   // Each real purchase hits this once via the Stripe redirect; a generous
   // cap here just blunts someone scripting session_id guesses.
-  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 30, keyPrefix: 'verify-payment' });
+  const rl = await rateLimit(req, { windowMs: 60 * 60 * 1000, max: 30, keyPrefix: 'verify-payment' });
   if (!rl.allowed) {
     res.setHeader('Retry-After', String(rl.retryAfterSec));
     return res.status(429).send('Too many requests, please try again shortly.');

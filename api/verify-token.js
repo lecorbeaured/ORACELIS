@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
 
   // This is called once per reading-page load in normal use, so a
   // generous cap only bites a script hammering the endpoint.
-  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 60, keyPrefix: 'verify-token' });
+  const rl = await rateLimit(req, { windowMs: 60 * 60 * 1000, max: 60, keyPrefix: 'verify-token' });
   if (!rl.allowed) {
     res.setHeader('Retry-After', String(rl.retryAfterSec));
     return res.status(429).json({ valid: false, tier: 'free', error: 'Too many requests' });

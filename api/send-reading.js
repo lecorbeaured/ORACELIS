@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
   // Unauthenticated and it costs a real Resend send each time, so cap it
   // per IP — generous enough for someone generating a few readings for
   // family, tight enough to stop a scripted flood.
-  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 10, keyPrefix: 'send-reading' });
+  const rl = await rateLimit(req, { windowMs: 60 * 60 * 1000, max: 10, keyPrefix: 'send-reading' });
   if (!rl.allowed) {
     res.setHeader('Retry-After', String(rl.retryAfterSec));
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });

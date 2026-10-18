@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
   // Server-side backstop behind the client-side localStorage check in
   // legal.js, which anyone can bypass by clearing storage or calling this
   // endpoint directly.
-  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 5, keyPrefix: 'contact' });
+  const rl = await rateLimit(req, { windowMs: 60 * 60 * 1000, max: 5, keyPrefix: 'contact' });
   if (!rl.allowed) {
     res.setHeader('Retry-After', String(rl.retryAfterSec));
     return res.status(429).json({ error: 'Too many messages. Please try again later.' });

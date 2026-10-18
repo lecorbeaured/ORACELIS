@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
 
   // Creating a session is free until someone pays, but nothing stops a
   // script from hammering this and creating junk sessions in Stripe.
-  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'create-checkout' });
+  const rl = await rateLimit(req, { windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'create-checkout' });
   if (!rl.allowed) {
     res.setHeader('Retry-After', String(rl.retryAfterSec));
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });

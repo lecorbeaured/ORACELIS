@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
   }
 
   // Unauthenticated, so cap it per IP like the other write-ish endpoints.
-  const rl = rateLimit(req, { windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'create-reading-token' });
+  const rl = await rateLimit(req, { windowMs: 60 * 60 * 1000, max: 20, keyPrefix: 'create-reading-token' });
   if (!rl.allowed) {
     res.setHeader('Retry-After', String(rl.retryAfterSec));
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });

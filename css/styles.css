@@ -1195,3 +1195,9 @@ p { font-size: clamp(0.95rem, 2.5vw, 1.1rem); color: var(--moonbeam); }
 .pricing-card:hover { transform: translateY(-6px); }
 .pricing-preview-card.recommended,
 .pricing-card.popular { box-shadow: 0 14px 44px rgba(212, 165, 116, 0.14); }
+
+/* 7. Hero orb visible on mobile (was desktop-only) */
+@media (max-width: 767px) {
+  .orb-container { display: flex; margin-top: var(--space-md); }
+  .orb { width: 220px; height: 220px; }
+}

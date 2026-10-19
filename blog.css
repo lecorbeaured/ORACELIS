@@ -134,6 +134,11 @@
 .article-body h3 { font-size: 1.2rem; color: var(--gold-bright); margin: var(--space-lg) 0 var(--space-xs); }
 .article-body a { color: var(--gold-shimmer); text-decoration: underline; text-decoration-color: rgba(212, 165, 116, 0.4); text-underline-offset: 3px; }
 .article-body a:hover { color: var(--gold-bright); text-decoration-color: var(--gold-bright); }
+/* Buttons inside article content (e.g. the reading CTA card) must keep
+   their button styling: the rule above would otherwise paint the label
+   gold-on-gold with an underline. Higher specificity wins. */
+.article-body a.btn { color: var(--midnight); text-decoration: none; }
+.article-body a.btn:hover { color: var(--midnight); text-decoration: none; }
 .article-body ul, .article-body ol { padding-left: 1.4rem; line-height: 1.85; }
 .article-body li { margin-bottom: 0.4rem; }
 .article-body strong { color: var(--starlight); font-weight: 500; }

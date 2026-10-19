@@ -54,7 +54,7 @@ const legalContent = {
     <p>Your birth data is used only to generate your reading and is not permanently stored on our servers. Payment processing is handled securely by Stripe. We do not store credit card information.</p>
 
     <h3>Cookies & Analytics</h3>
-    <p>We use Google Analytics to understand how visitors use our site. This helps us improve our service. You can opt out of analytics tracking through your browser settings.</p>
+    <p>We use Google Analytics, which sets cookies, to collect anonymous information about how visitors use our site, such as pages viewed and approximate location. We do not use advertising cookies. If you are in the European Economic Area, the United Kingdom or Switzerland, analytics cookies are only used after you click Accept on our cookie banner. Elsewhere, analytics is on by default and you can click Decline on the banner. Your choice is stored in your browser, and you can change it at any time by clearing this site's data in your browser settings, after which the banner will appear again. Google processes this data under its own privacy policy.</p>
 
     <h3>Email & Marketing</h3>
     <p>Your reading is delivered to the email address you provide. That email address may also be added to our mailing list so we can send occasional future spiritual insights — you can unsubscribe at any time using the link in any marketing email. Your email is never sold or shared with third parties.</p>
@@ -78,7 +78,7 @@ const legalContent = {
     <h3>Contact</h3>
     <p>For privacy-related questions, contact us at <a href="mailto:support@oracelis.app">support@oracelis.app</a>.</p>
 
-    <p class="last-updated">Last updated: September 2026</p>
+    <p class="last-updated">Last updated: October 2026</p>
   `,
   
   terms: `

@@ -27,6 +27,7 @@ const { Redis } = require('@upstash/redis');
 const DAY_MS = 24 * 60 * 60 * 1000;
 const KEY_TTL_SEC = 10 * 24 * 60 * 60; // 10 days: covers Day 7 + buffer
 const DUE_SET = 'followup:due'; // sorted set: member = email hash, score = next due timestamp (ms)
+const READERS_SET = 'readers:all'; // sorted set: member = email, score = first-seen timestamp (ms). No expiry.
 const MAX_PER_RUN = 50; // records processed per cron run
 const FROM = 'ORACELIS <readings@oracelis.app>';
 const UNSUBSCRIBE_MAILTO = '<mailto:readings@oracelis.app?subject=unsubscribe>';
@@ -229,6 +230,34 @@ async function processDueFollowups({ resend }) {
 }
 
 /**
+ * Permanently archive the reader in Upstash, independent of Resend.
+ * Resend deletes email logs after 30 days; this is the owned copy of the
+ * mailing list: a `readers:all` sorted set (member = email, score =
+ * first-seen timestamp) plus a `reader:<hash>` record with the name.
+ * No expiry. Repeat signups keep the original first-seen date.
+ * Never throws; no-op when Upstash isn't configured.
+ */
+async function saveReaderRecord({ email, name }) {
+  const redis = redisClient();
+  if (!redis || !email) return;
+  try {
+    const member = String(email).toLowerCase().trim();
+    const existing = await redis.zscore(READERS_SET, member);
+    if (existing === null || existing === undefined) {
+      const now = Date.now();
+      await redis.zadd(READERS_SET, { score: now, member });
+      await redis.set(
+        `reader:${keyFor(email).slice('followup:'.length)}`,
+        JSON.stringify({ email: member, name: esc(name || '').slice(0, 100), firstSeen: new Date(now).toISOString() })
+      );
+      console.log('Reader archived to Upstash list');
+    }
+  } catch (err) {
+    console.error('Reader archive failed:', err && err.message ? err.message : err);
+  }
+}
+
+/**
  * Flag a reader as a buyer after purchase so the Day 7 pitch is skipped.
  * Day 3 (pure content) still goes out. Never throws.
  */
@@ -249,4 +278,4 @@ async function cancelFollowupPitch({ email }) {
   }
 }
 
-module.exports = { scheduleFollowups, processDueFollowups, cancelFollowupPitch, keyFor };
+module.exports = { scheduleFollowups, processDueFollowups, cancelFollowupPitch, saveReaderRecord, keyFor };

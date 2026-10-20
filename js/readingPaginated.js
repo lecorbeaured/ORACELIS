@@ -321,7 +321,7 @@ function showPage(index) {
     contentEl.innerHTML = `
       <div class="content-fade-wrapper">${formatContent(previewText)}</div>
       <div class="soft-lock-nudge">
-        <p class="soft-lock-nudge-text">Your reading continues — the rest unlocks with Insight Overview or the Complete Reading.</p>
+        <p class="soft-lock-nudge-text">Your reading continues — the rest unlocks with the Full Current State Reading or the Complete Reading.</p>
         <button type="button" class="btn btn-primary soft-lock-continue-btn" id="soft-lock-continue">Continue Reading →</button>
       </div>
     `;
@@ -344,7 +344,7 @@ function showPage(index) {
   const lockedOverlay = document.getElementById('locked-overlay');
   if (isLocked) {
     lockedOverlay.style.display = 'flex';
-    updateLockedUI(page.tier);
+    updateLockedUI(page.tier, page.title);
     // Track paywall view
     if (typeof trackPaywallView === 'function') trackPaywallView(page.tier);
   } else {
@@ -394,19 +394,25 @@ function isPageLocked(tier) {
   return true;
 }
 
-function updateLockedUI(requiredTier) {
+function updateLockedUI(requiredTier, nextTitle) {
   const titleEl = document.getElementById('locked-title');
   const descEl = document.getElementById('locked-description');
   const pricingEl = document.getElementById('locked-pricing');
-  
+
+  // Name the exact section the reader just tried to open. It converts
+  // better than a generic line, and the title is already on the page
+  // object, so this stays truthful for every locked section.
+  const nextLine = nextTitle ? `Next in your reading: ${nextTitle}.` : '';
+  const trustLine = `<p class="locked-trust">Instant access after checkout. Yours to keep, to read or print anytime. Covered by the 7-day guarantee.</p>`;
+
   if (requiredTier === 'tier1') {
     titleEl.textContent = 'Continue Your Reading';
-    descEl.textContent = 'Discover how to work with your patterns.';
-    
+    descEl.textContent = nextLine || 'Discover how to work with your patterns.';
+
     pricingEl.innerHTML = `
       <div class="pricing-option">
         <div class="pricing-option-header">
-          <span class="pricing-option-name">Insight</span>
+          <span class="pricing-option-name">Full Current State Reading</span>
           <span class="pricing-option-price">$29</span>
         </div>
         <ul class="pricing-option-features">
@@ -419,7 +425,7 @@ function updateLockedUI(requiredTier) {
       
       <div class="pricing-option recommended">
         <div class="pricing-option-header">
-          <span class="pricing-option-name">Complete</span>
+          <span class="pricing-option-name">Complete Reading</span>
           <span class="pricing-option-price">$49</span>
         </div>
         <ul class="pricing-option-features">
@@ -432,15 +438,16 @@ function updateLockedUI(requiredTier) {
       </div>
       
       <button class="maybe-later-btn" onclick="handleMaybeLater()">Maybe Later</button>
+      ${trustLine}
     `;
   } else if (requiredTier === 'tier2') {
     titleEl.textContent = 'Unlock Your Success Code';
-    descEl.textContent = 'Get the complete picture.';
-    
+    descEl.textContent = nextLine || 'Get the complete picture.';
+
     pricingEl.innerHTML = `
       <div class="pricing-option recommended">
         <div class="pricing-option-header">
-          <span class="pricing-option-name">Upgrade</span>
+          <span class="pricing-option-name">Complete Reading</span>
           <span class="pricing-option-price">$20</span>
         </div>
         <ul class="pricing-option-features">
@@ -450,8 +457,9 @@ function updateLockedUI(requiredTier) {
         </ul>
         <button class="btn btn-primary unlock-btn" onclick="handleUpgrade('upgrade')">Unlock $20</button>
       </div>
-      
+
       <button class="maybe-later-btn" onclick="handleMaybeLater()">Maybe Later</button>
+      ${trustLine}
     `;
   }
 }

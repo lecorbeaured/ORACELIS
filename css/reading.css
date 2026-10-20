@@ -321,9 +321,19 @@
   max-width: 260px;
 }
 
+/* Trust line under the gate pricing */
+.locked-trust {
+  color: var(--silver-dust);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin-top: var(--space-md);
+  opacity: 0.85;
+  text-align: center;
+}
+
 /* Maybe Later button */
-.maybe-later-btn {
-  background: rgba(255, 255, 255, 0.03);
+.maybe-later-btn {  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(200, 197, 214, 0.2);
   border-radius: 6px;
   color: var(--silver-dust);

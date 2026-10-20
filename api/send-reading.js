@@ -134,7 +134,7 @@ module.exports = async (req, res) => {
     // is a no-op unless Upstash is configured, so the Day 1 flow is safe.
     if (!tier || tier === 'free') {
       const { scheduleFollowups } = require('./_followup');
-      await scheduleFollowups({ resend, email, name, unlockUrl });
+      await scheduleFollowups({ email, name, unlockUrl });
     }
 
     return res.status(200).json({ success: true, messageId: data?.id });

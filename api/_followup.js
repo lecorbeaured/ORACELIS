@@ -1,25 +1,33 @@
 // api/_followup.js
 // Day 3 / Day 7 follow-up email scheduler for free readings.
 //
-// How it works:
-// - send-reading.js calls scheduleFollowups() right after the Day 1 reading
-//   email goes out (free tier only).
-// - Day 3 and Day 7 are sent via Resend's scheduledAt, so no cron, worker,
-//   or broadcast is needed. The Day 7 email carries the reader's personal
-//   unlock URL, which never expires for free readings (name/dob rebuild the
-//   reading, no token involved), so it lands straight on the $29/$49 choice.
+// How it works (v2, self-scheduled):
+// - Resend's scheduledAt was verified broken for us on Oct 19, 2026: two
+//   live test runs delivered the "scheduled" follow-ups immediately, so
+//   we no longer trust Resend to hold them. We hold them ourselves.
+// - send-reading.js calls scheduleFollowups() after the Day 1 email. It
+//   stores a record in Upstash Redis (keyed by a SHA-256 hash of the
+//   email) plus an entry in a `followup:due` sorted set scored by the
+//   Day 3 timestamp. No email is sent at schedule time.
+// - A daily Vercel Cron hits /api/send-followups, which calls
+//   processDueFollowups(): it sends whatever is due (Day 3 first, then
+//   Day 7) as ordinary immediate Resend sends and advances the record.
 // - verify-payment.js calls cancelFollowupPitch() on every successful
-//   purchase so buyers never get pitched something they already own.
-//   (Day 3 is pure content, so buyers keep receiving it.)
-// - Scheduled email IDs live in Upstash Redis, keyed by a SHA-256 hash of
-//   the email address, with a 9-day TTL. If Upstash isn't configured,
-//   everything below is a no-op and the Day 1 flow is untouched.
+//   purchase; it flags the record `buyer: true` so the Day 7 pitch is
+//   skipped. (Day 3 is pure content, so buyers keep receiving it.)
+// - The Day 7 email carries the reader's personal unlock URL, which
+//   never expires for free readings (name/dob rebuild the reading, no
+//   token involved), so it lands straight on the $29/$49 choice.
+// - If Upstash isn't configured, everything below is a no-op and the
+//   Day 1 flow is untouched.
 
 const crypto = require('crypto');
 const { Redis } = require('@upstash/redis');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const KEY_TTL_SEC = 9 * 24 * 60 * 60; // 9 days: covers Day 7 + buffer
+const KEY_TTL_SEC = 10 * 24 * 60 * 60; // 10 days: covers Day 7 + buffer
+const DUE_SET = 'followup:due'; // sorted set: member = email hash, score = next due timestamp (ms)
+const MAX_PER_RUN = 50; // records processed per cron run
 const FROM = 'ORACELIS <readings@oracelis.app>';
 const UNSUBSCRIBE_MAILTO = '<mailto:readings@oracelis.app?subject=unsubscribe>';
 
@@ -107,76 +115,138 @@ function day7Html(name, unlockUrl) {
 }
 
 /**
- * Schedule Day 3 + Day 7 follow-ups for a free reading. Never throws:
- * failures are logged and the Day 1 flow continues untouched.
+ * Store a pending follow-up record for a free reading. Sends nothing:
+ * a daily cron (api/send-followups.js) delivers Day 3 / Day 7 when due.
+ * Never throws: failures are logged and the Day 1 flow continues.
  */
-async function scheduleFollowups({ resend, email, name, unlockUrl }) {
+async function scheduleFollowups({ email, name, unlockUrl }) {
   const redis = redisClient();
   if (!redis) {
     console.warn('Follow-up scheduler skipped: UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN not set.');
     return;
   }
-  if (!resend || !email) return;
+  if (!email) return;
 
   try {
-    const safeName = esc(name || 'Seeker').slice(0, 100) || 'Seeker';
-    const safeEmail = esc(email);
-    const common = {
-      from: FROM,
-      to: safeEmail,
-      headers: { 'List-Unsubscribe': UNSUBSCRIBE_MAILTO },
+    const now = Date.now();
+    const record = {
+      email: String(email),
+      name: esc(name || 'Seeker').slice(0, 100) || 'Seeker',
+      unlockUrl: unlockUrl || 'https://oracelis.app',
+      day3At: now + 3 * DAY_MS,
+      day7At: now + 7 * DAY_MS,
+      stage: 0, // 0 = nothing sent, 1 = Day 3 sent
+      buyer: false,
     };
-
-    const day3At = new Date(Date.now() + 3 * DAY_MS).toISOString();
-    const day7At = new Date(Date.now() + 7 * DAY_MS).toISOString();
-
-    const day3 = await resend.emails.send({
-      ...common,
-      subject: 'The energy of this week, for you',
-      html: day3Html(safeName),
-      scheduledAt: day3At,
-    });
-    if (day3.error) throw new Error('Day 3 schedule failed: ' + JSON.stringify(day3.error));
-
-    const day7 = await resend.emails.send({
-      ...common,
-      subject: 'Your free reading was just the surface',
-      html: day7Html(safeName, unlockUrl || 'https://oracelis.app'),
-      scheduledAt: day7At,
-    });
-    if (day7.error) throw new Error('Day 7 schedule failed: ' + JSON.stringify(day7.error));
-
-    console.log('Follow-ups scheduled', { day3: day3.data.id, day3At, day7: day7.data.id, day7At });
-
-    await redis.set(
-      keyFor(safeEmail),
-      JSON.stringify({ day3: day3.data.id, day7: day7.data.id }),
-      { ex: KEY_TTL_SEC }
-    );
+    const key = keyFor(email);
+    const hash = key.slice('followup:'.length);
+    await redis.set(key, JSON.stringify(record), { ex: KEY_TTL_SEC });
+    await redis.zadd(DUE_SET, { score: record.day3At, member: hash });
+    console.log('Follow-ups stored', { day3At: new Date(record.day3At).toISOString(), day7At: new Date(record.day7At).toISOString() });
   } catch (err) {
     console.error('Follow-up scheduling failed (Day 1 unaffected):', err && err.message ? err.message : err);
   }
 }
 
 /**
- * Cancel the scheduled Day 7 pitch after a purchase. Keeps Day 3 (pure
- * content). Never throws.
+ * Send every follow-up that is due. Called by the daily cron endpoint.
+ * Sends are plain immediate sends (no Resend scheduling). A record whose
+ * send fails keeps its stage, so the next run retries it. Returns a
+ * summary; never throws.
  */
-async function cancelFollowupPitch({ resend, email }) {
+async function processDueFollowups({ resend }) {
+  const summary = { checked: 0, day3Sent: 0, day7Sent: 0, skippedBuyer: 0, errors: 0 };
   const redis = redisClient();
-  if (!redis || !resend || !email) return;
+  if (!redis || !resend) return { ...summary, skipped: 'not-configured' };
+
+  const now = Date.now();
+  let hashes = [];
   try {
-    const raw = await redis.get(keyFor(email));
-    if (!raw) return;
-    const ids = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    if (ids && ids.day7) {
-      await resend.emails.cancel(ids.day7);
-      console.log('Cancelled Day 7 pitch after purchase', { day7: ids.day7 });
+    hashes = await redis.zrange(DUE_SET, '-inf', now, { byScore: true, offset: 0, count: MAX_PER_RUN });
+  } catch (err) {
+    console.error('Follow-up due-scan failed:', err && err.message ? err.message : err);
+    return { ...summary, errors: 1 };
+  }
+
+  for (const hash of hashes) {
+    const key = `followup:${hash}`;
+    try {
+      const raw = await redis.get(key);
+      if (!raw) { await redis.zrem(DUE_SET, hash); continue; }
+      const rec = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      // Records written by the old Resend-scheduled version have no
+      // timestamps; those emails already went out, so just clean up.
+      if (!rec || !rec.day3At || !rec.day7At || !rec.email) {
+        await redis.del(key);
+        await redis.zrem(DUE_SET, hash);
+        continue;
+      }
+      summary.checked++;
+
+      if (rec.stage === 0 && now >= rec.day3At) {
+        const { error } = await resend.emails.send({
+          from: FROM,
+          to: rec.email,
+          headers: { 'List-Unsubscribe': UNSUBSCRIBE_MAILTO },
+          subject: 'The energy of this week, for you',
+          html: day3Html(rec.name),
+        });
+        if (error) throw new Error('Day 3 send failed: ' + JSON.stringify(error));
+        rec.stage = 1;
+        summary.day3Sent++;
+      }
+
+      if (rec.stage === 1 && now >= rec.day7At) {
+        if (rec.buyer) {
+          summary.skippedBuyer++;
+        } else {
+          const { error } = await resend.emails.send({
+            from: FROM,
+            to: rec.email,
+            headers: { 'List-Unsubscribe': UNSUBSCRIBE_MAILTO },
+            subject: 'Your free reading was just the surface',
+            html: day7Html(rec.name, rec.unlockUrl),
+          });
+          if (error) throw new Error('Day 7 send failed: ' + JSON.stringify(error));
+          summary.day7Sent++;
+        }
+        await redis.del(key);
+        await redis.zrem(DUE_SET, hash);
+        continue;
+      }
+
+      // Not finished: persist any stage change and re-score to Day 7.
+      await redis.set(key, JSON.stringify(rec), { ex: KEY_TTL_SEC });
+      await redis.zadd(DUE_SET, { score: rec.day7At, member: hash });
+    } catch (err) {
+      summary.errors++;
+      console.error('Follow-up processing failed for one record:', err && err.message ? err.message : err);
     }
-    await redis.del(keyFor(email));
+  }
+
+  console.log('Follow-up run complete', summary);
+  return summary;
+}
+
+/**
+ * Flag a reader as a buyer after purchase so the Day 7 pitch is skipped.
+ * Day 3 (pure content) still goes out. Never throws.
+ */
+async function cancelFollowupPitch({ email }) {
+  const redis = redisClient();
+  if (!redis || !email) return;
+  try {
+    const key = keyFor(email);
+    const raw = await redis.get(key);
+    if (!raw) return;
+    const rec = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!rec || !rec.day3At) { await redis.del(key); return; }
+    rec.buyer = true;
+    await redis.set(key, JSON.stringify(rec), { ex: KEY_TTL_SEC });
+    console.log('Day 7 pitch will be skipped (buyer)');
   } catch (err) {
     console.error('Follow-up cancellation failed:', err && err.message ? err.message : err);
   }
 }
 
-module.exports = { scheduleFollowups, cancelFollowupPitch, keyFor };
+module.exports = { scheduleFollowups, processDueFollowups, cancelFollowupPitch, keyFor };

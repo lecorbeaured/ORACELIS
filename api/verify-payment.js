@@ -62,7 +62,7 @@ module.exports = async (req, res) => {
     // They just bought: cancel the scheduled Day 7 pitch so buyers never
     // get pitched something they already own. Never throws; no-op unless
     // Upstash is configured.
-    await cancelFollowupPitch({ resend, email });
+    await cancelFollowupPitch({ email });
 
     // Redirect to reading page with token
     return res.redirect(302, `${baseUrl}/reading.html?token=${token}`);

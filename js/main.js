@@ -194,6 +194,9 @@ function handleFormSubmit(e) {
   
   // Track form submission
   if (typeof trackFormSubmit === 'function') trackFormSubmit(true);
+
+  // Meta Pixel: a completed reading form is a Lead
+  if (typeof fbq === 'function') fbq('track', 'Lead');
   
   // Record this reading attempt
   recordReading();

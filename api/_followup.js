@@ -127,11 +127,14 @@ async function scheduleFollowups({ resend, email, name, unlockUrl }) {
       headers: { 'List-Unsubscribe': UNSUBSCRIBE_MAILTO },
     };
 
+    const day3At = new Date(Date.now() + 3 * DAY_MS).toISOString();
+    const day7At = new Date(Date.now() + 7 * DAY_MS).toISOString();
+
     const day3 = await resend.emails.send({
       ...common,
       subject: 'The energy of this week, for you',
       html: day3Html(safeName),
-      scheduledAt: new Date(Date.now() + 3 * DAY_MS).toISOString(),
+      scheduledAt: day3At,
     });
     if (day3.error) throw new Error('Day 3 schedule failed: ' + JSON.stringify(day3.error));
 
@@ -139,16 +142,17 @@ async function scheduleFollowups({ resend, email, name, unlockUrl }) {
       ...common,
       subject: 'Your free reading was just the surface',
       html: day7Html(safeName, unlockUrl || 'https://oracelis.app'),
-      scheduledAt: new Date(Date.now() + 7 * DAY_MS).toISOString(),
+      scheduledAt: day7At,
     });
     if (day7.error) throw new Error('Day 7 schedule failed: ' + JSON.stringify(day7.error));
+
+    console.log('Follow-ups scheduled', { day3: day3.data.id, day3At, day7: day7.data.id, day7At });
 
     await redis.set(
       keyFor(safeEmail),
       JSON.stringify({ day3: day3.data.id, day7: day7.data.id }),
       { ex: KEY_TTL_SEC }
     );
-    console.log('Follow-ups scheduled', { day3: day3.data.id, day7: day7.data.id });
   } catch (err) {
     console.error('Follow-up scheduling failed (Day 1 unaffected):', err && err.message ? err.message : err);
   }

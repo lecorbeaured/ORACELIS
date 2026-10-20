@@ -65,7 +65,12 @@ module.exports = async (req, res) => {
     await cancelFollowupPitch({ email });
 
     // Redirect to reading page with token
-    return res.redirect(302, `${baseUrl}/reading.html?token=${token}`);
+    // Append the verified payment amount so the reading page can fire a
+    // one-time Meta Pixel Purchase event. currency comes from Stripe;
+    // both are stripped from the URL after firing so refreshes and
+    // shared links never re-fire.
+    const purchaseParams = `&purchased=${session.amount_total}&currency=${String(session.currency || 'usd').toUpperCase()}`;
+    return res.redirect(302, `${baseUrl}/reading.html?token=${token}${purchaseParams}`);
 
   } catch (error) {
     console.error('Verification error:', error);

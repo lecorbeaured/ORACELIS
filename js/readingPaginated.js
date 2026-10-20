@@ -46,10 +46,29 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+// Meta Pixel: one-time Purchase event right after a verified Stripe
+// payment. The `purchased` (cents) and `currency` params are appended by
+// /api/verify-payment, which only runs after Stripe confirms `paid`, so
+// the event reflects real money. They are stripped from the URL right
+// after firing, so a refresh, a revisit, or a shared link never re-fires.
+function firePurchaseEvent(params, tier) {
+  const cents = parseInt(params.get('purchased'), 10);
+  const currency = (params.get('currency') || 'USD').toUpperCase();
+  if (!cents || cents <= 0) return;
+  if (tier !== 'tier1' && tier !== 'tier2') return;
+  params.delete('purchased');
+  params.delete('currency');
+  const query = params.toString();
+  const clean = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
+  window.history.replaceState({}, '', clean);
+  if (typeof fbq === 'function') {
+    fbq('track', 'Purchase', { value: cents / 100, currency });
+  }
+}
+
 async function loadReading() {
   const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  
+  const token = params.get('token');  
   // If we have a token, verify it server-side
   if (token) {
     try {
@@ -70,6 +89,9 @@ async function loadReading() {
         
         // Store for potential upgrades
         window.readingUserData = { name: userName, dob, email, version };
+
+        // One-time Purchase event if this load follows a Stripe payment
+        firePurchaseEvent(params, userTier);
 
         return initializeReading(dob, version, email, token);
       }

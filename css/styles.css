@@ -883,14 +883,25 @@ p { font-size: clamp(0.95rem, 2.5vw, 1.1rem); color: var(--moonbeam); }
 }
 
 .footer-link {
+  /* One rule for both the <a> links and the <button> legal items:
+     reset every browser default that treats them differently, so
+     the whole footer row renders identically everywhere. */
+  -webkit-appearance: none;
+  appearance: none;
   background: transparent;
   border: none;
   color: var(--silver-dust);
   font-family: var(--font-body);
   font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  text-decoration: none;
   cursor: pointer;
   transition: color 0.2s ease;
   padding: 0;
+  margin: 0;
 }
 
 .footer-link:hover {

@@ -129,12 +129,31 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     <div class="container">
       <div class="footer-logo">✦ ORACELIS ✦</div>
       <p class="footer-tagline">Spiritual guidance for the modern seeker</p>
-      <p class="footer-contact"><a href="/" style="color:var(--gold-shimmer);">oracelis.app</a> · Las Vegas, NV</p>
-      <p class="footer-copyright">© 2026 ORACELIS. All rights reserved.</p>
+      <div class="footer-links">
+        <a class="footer-link" href="/blog/" style="text-decoration:none;">Blog</a>
+        <a class="footer-link" href="/planetary-hours" style="text-decoration:none;">Planetary Hours</a>
+        <a class="footer-link" href="/electional-astrology" style="text-decoration:none;">Best Dates</a>
+        <button class="footer-link" onclick="openModal('contact')">Contact</button>
+        <button class="footer-link" onclick="openModal('privacy')">Privacy Policy</button>
+        <button class="footer-link" onclick="openModal('terms')">Terms of Service</button>
+        <button class="footer-link" onclick="openModal('refund')">Refund Policy</button>
+        <button class="footer-link" onclick="openModal('disclaimer')">Disclaimer</button>
+      </div>
+      <p class="footer-contact">support@oracelis.app • Las Vegas, NV</p>
+      <p class="footer-copyright">© <script>document.write(new Date().getFullYear())</script> ORACELIS. All rights reserved.</p>
     </div>
   </footer>
+  <!-- Legal Modals -->
+  <div class="legal-modal-overlay" id="legal-modal" onclick="closeModal(event)">
+    <div class="legal-modal" onclick="event.stopPropagation()">
+      <button class="legal-modal-close" onclick="closeModal()">&times;</button>
+      <div class="legal-modal-content" id="legal-modal-content"></div>
+    </div>
+  </div>
+
   <script>
     (function(){var c=document.getElementById('starfield');if(!c)return;for(var i=0;i<80;i++){var s=document.createElement('div');s.className='star';s.style.left=(Math.random()*100)+'%';s.style.top=(Math.random()*100)+'%';var w=(Math.random()*2+1)+'px';s.style.width=w;s.style.height=w;s.style.setProperty('--opacity',Math.random()*0.5+0.2);s.style.setProperty('--duration',(Math.random()*3+2)+'s');s.style.setProperty('--delay',(Math.random()*5)+'s');c.appendChild(s);}})();
   </script>
+  <script src="/js/legal.js"></script>
 </body>
 </html>

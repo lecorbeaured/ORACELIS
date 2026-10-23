@@ -378,14 +378,38 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .faq-icon { color:var(--gold-dim); font-size:1.1rem; flex-shrink:0; }
     .faq-a { font-size:13px; color:var(--moonbeam); line-height:1.75; max-height:0; overflow:hidden; transition:max-height 0.4s ease, margin-top 0.3s ease; }
 
-    /* Footer */
-    .site-footer { border-top:1px solid rgba(212,165,116,0.1); padding:40px 32px; display:flex; flex-wrap:wrap; gap:24px; justify-content:space-between; align-items:flex-start; position:relative; z-index:1; margin-top:48px; }
-    .footer-brand { font-family:'Cormorant Garamond',serif; font-size:1.1rem; letter-spacing:0.1em; color:var(--gold); margin-bottom:8px; }
-    .footer-tagline { font-size:11px; color:var(--moonbeam); letter-spacing:0.14em; }
-    .footer-links { display:flex; flex-direction:column; gap:8px; }
-    .footer-link { font-size:11px; letter-spacing:0.18em; color:var(--moonbeam); text-decoration:none; text-transform:uppercase; transition:color 0.2s; }
-    .footer-link:hover { color:var(--gold); }
-    .footer-copy { width:100%; text-align:center; font-size:11px; color:var(--gold-dim); letter-spacing:0.14em; border-top:1px solid rgba(212,165,116,0.08); padding-top:20px; margin-top:8px; }
+    /* ── Footer (canonical, matches oracelis.app) ── */
+    .site-footer { padding: 2.5rem 0; border-top: 1px solid rgba(200,197,214,0.1); text-align: center; position: relative; z-index: 1; }
+    .site-footer .container { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+    .footer-logo { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem; color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; letter-spacing: 0.1em; }
+    .footer-tagline { font-size: 0.85rem; color: #a8a4b8; margin-bottom: 0.5rem; }
+    .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem 1.5rem; margin: 1.5rem 0; }
+    .footer-link { background: transparent; border: none; color: #a8a4b8; font-family: 'Josefin Sans', sans-serif; font-size: 0.85rem; letter-spacing: normal; text-transform: none; cursor: pointer; transition: color 0.2s ease; padding: 0; text-decoration: none; }
+    .footer-link:hover { color: var(--gold); }
+    .footer-contact { font-size: 0.85rem; color: var(--moonbeam); margin-bottom: 0.5rem; }
+    .footer-copyright { font-size: 0.75rem; color: #a8a4b8; opacity: 0.7; }
+    /* ── Legal modal (canonical) ── */
+    .legal-modal-overlay { position: fixed; inset: 0; background: rgba(10,10,18,0.9); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem; opacity: 0; transition: opacity 0.3s ease; }
+    .legal-modal-overlay.active { display: flex; opacity: 1; }
+    .legal-modal { background: var(--surface); border: 1px solid rgba(200,197,214,0.15); border-radius: 16px; width: 100%; max-width: 600px; max-height: 80vh; position: relative; display: flex; flex-direction: column; box-shadow: 0 25px 80px rgba(0,0,0,0.5); }
+    .legal-modal-close { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #a8a4b8; font-size: 1.75rem; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s ease; z-index: 1; }
+    .legal-modal-close:hover { color: var(--starlight); background: rgba(200,197,214,0.1); }
+    .legal-modal-content { padding: 2.5rem; overflow-y: auto; flex: 1; text-align: left; }
+    .legal-modal-content h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--gold); margin-bottom: 1.5rem; padding-right: 2.5rem; }
+    .legal-modal-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--starlight); margin: 1.5rem 0 1rem; }
+    .legal-modal-content p { color: var(--moonbeam); font-size: 0.9rem; line-height: 1.7; margin-bottom: 1rem; }
+    .legal-modal-content ul { color: var(--moonbeam); font-size: 0.9rem; line-height: 1.7; margin: 1rem 0 1rem 1.5rem; }
+    .legal-modal-content li { margin-bottom: 0.35rem; }
+    .legal-modal-content a { color: var(--gold); }
+    .legal-modal-content .last-updated { font-size: 0.8rem; color: #a8a4b8; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(200,197,214,0.1); }
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+    .contact-form input, .contact-form textarea { background: rgba(255,255,255,0.05); border: 1px solid rgba(200,197,214,0.2); border-radius: 8px; padding: 0.75rem 1rem; color: var(--starlight); font-family: 'Josefin Sans', sans-serif; font-size: 0.9rem; transition: border-color 0.2s ease; }
+    .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--gold); }
+    .contact-form textarea { min-height: 120px; resize: vertical; }
+    .contact-form button { align-self: flex-start; }
+    .legal-modal-content::-webkit-scrollbar { width: 6px; }
+    .legal-modal-content::-webkit-scrollbar-track { background: transparent; }
+    .legal-modal-content::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 3px; }
 
     /* Animations */
     @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
@@ -555,15 +579,31 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
 </main>
 
 <footer class="site-footer">
-  <div><div class="footer-brand">✦ ORACELIS ✦</div><div class="footer-tagline">Spiritual guidance for the modern seeker</div></div>
-  <div class="footer-links">
-    <a href="https://oracelis.app/electional-astrology" class="footer-link">Best Dates</a>
-    <a href="https://oracelis.app/planetary-hours" class="footer-link">Planetary Hours</a>
-    <a href="https://oracelis.app/blog/" class="footer-link">Blog</a>
-    <a href="#" id="privacyLink" class="footer-link" hidden>Privacy Policy</a>
+    <div class="container">
+      <div class="footer-logo">✦ ORACELIS ✦</div>
+      <p class="footer-tagline">Spiritual guidance for the modern seeker</p>
+      <div class="footer-links">
+        <a class="footer-link" href="/blog/" style="text-decoration:none;">Blog</a>
+        <a class="footer-link" href="/planetary-hours" style="text-decoration:none;">Planetary Hours</a>
+        <a class="footer-link" href="/electional-astrology" style="text-decoration:none;">Best Dates</a>
+        <button class="footer-link" onclick="openModal('contact')">Contact</button>
+        <button class="footer-link" onclick="openModal('privacy')">Privacy Policy</button>
+        <button class="footer-link" onclick="openModal('terms')">Terms of Service</button>
+        <button class="footer-link" onclick="openModal('refund')">Refund Policy</button>
+        <button class="footer-link" onclick="openModal('disclaimer')">Disclaimer</button>
+      </div>
+      <p class="footer-contact">support@oracelis.app • Las Vegas, NV</p>
+      <p class="footer-copyright">© <script>document.write(new Date().getFullYear())</script> ORACELIS. All rights reserved.</p>
+    </div>
+  </footer>
+  <!-- Legal Modals -->
+  <div class="legal-modal-overlay" id="legal-modal" onclick="closeModal(event)">
+    <div class="legal-modal" onclick="event.stopPropagation()">
+      <button class="legal-modal-close" onclick="closeModal()">&times;</button>
+      <div class="legal-modal-content" id="legal-modal-content"></div>
+    </div>
   </div>
-  <div class="footer-copy">&copy; 2026 ORACELIS &nbsp;&middot;&nbsp; <a href="https://oracelis.app/" class="footer-link" style="display:inline">oracelis.app</a></div>
-</footer>
+
 
 <script>
 var EPHEM = {
@@ -1038,10 +1078,11 @@ function startStars(){
   function clamp(d){ var s = ymdStr(d); return s < SUP_FROM ? SUP_FROM : (s > SUP_TO ? SUP_TO : s); }
   $('fromDate').value = clamp(a); $('toDate').value = clamp(b);
   $('supRange').textContent = SUP_FROM + ' to ' + SUP_TO;
-  if (CFG.privacyUrl) { var pl = $('privacyLink'); pl.href = CFG.privacyUrl; pl.hidden = false; }
+  if (CFG.privacyUrl) { var pl = $('privacyLink'); if (pl) { pl.href = CFG.privacyUrl; pl.hidden = false; } }
   if (CFG.deepReadingEnabled) { $('deepUpsell').hidden = false; $('deepCta').addEventListener('click', startDeepCheckout); }
 })();
 
 </script>
+  <script src="/js/legal.js"></script>
 </body>
 </html>

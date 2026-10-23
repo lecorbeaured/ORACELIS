@@ -77,11 +77,28 @@ function emailShell(title, preheader, bodyInner) {
 }
 
 function day3Html(name) {
+  // The worked example below always uses the real send date for "today"
+  // (UTC, matching the Vercel cron), computed at send time. March 14 is
+  // an example birth date only: no reader birth dates are stored, so the
+  // example cannot be personalized.
+  const day = new Date().getUTCDate();
+  const suffix = (day % 10 === 1 && day !== 11) ? 'st'
+    : (day % 10 === 2 && day !== 12) ? 'nd'
+    : (day % 10 === 3 && day !== 13) ? 'rd' : 'th';
+  const digits = [3, 1, 4, ...String(day).split('').map(Number)];
+  let total = digits.reduce((a, b) => a + b, 0);
+  let math = `${digits.join(' + ')} = ${total}`;
+  while (total > 9) {
+    const parts = String(total).split('').map(Number);
+    total = parts.reduce((a, b) => a + b, 0);
+    math += `, then ${parts.join(' + ')} = ${total}`;
+  }
+  const todayExample = `For example, born March 14, and today is the ${day}${suffix}: ${math}. ${total === 8 ? 'An' : 'A'} ${total} day.`;
   const body = `
 <p style="color:#f5f5f7;font-size:18px;">Hi ${name},</p>
 <p>Your birth date gave you your life path number. But numbers move. Every single day carries its own vibration, and when you know it, you stop pushing against the week and start moving with it.</p>
 <p>Here is the 30-second calculation. Add your birth month + birth day + today's date, then reduce to a single digit.</p>
-<p>Born March 14, and today is the 18th: 3 + 1 + 4 + 1 + 8 = 17, then 1 + 7 = 8. An 8 day.</p>
+<p>${todayExample}</p>
 <p>Each result has a flavor:</p>
 <ul style="color:#c8c5d6;line-height:2;">
 <li><strong style="color:#d4a574;">1:</strong> start something. <strong style="color:#d4a574;">2:</strong> listen and connect. <strong style="color:#d4a574;">3:</strong> create and express.</li>

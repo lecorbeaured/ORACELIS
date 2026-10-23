@@ -36,6 +36,17 @@ module.exports = async (req, res) => {
       console.error('subscribe: Resend error', error);
       return res.status(502).json({ error: 'Could not save email' });
     }
+
+    // Also archive to our own Upstash readers list, same as the main
+    // reading flow, so tool signups are in the owned copy too.
+    // Never throws; a failure here must not fail the signup.
+    try {
+      const { saveReaderRecord } = require('./_followup');
+      await saveReaderRecord({ email });
+    } catch (archiveError) {
+      console.error('subscribe: archive failed', archiveError);
+    }
+
     return res.status(200).json({ ok: true });
   } catch (e) {
     console.error('subscribe: failed', e);

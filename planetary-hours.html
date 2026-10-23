@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1265608872395585');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Planetary Hours Calculator: What Hour Is It Now? | ORACELIS</title>
@@ -433,6 +450,15 @@
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
   </style>
+<!-- Google Analytics -->
+  <script src="/js/consent.js"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-09RWYRGR23"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-09RWYRGR23');
+  </script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the calculator</a>
@@ -992,6 +1018,7 @@ function submitEmail(e){
     body: JSON.stringify({ email: v, source: 'planetary-hours', timezone: displayTz || '' })
   }).then(function(r){
     if (!r.ok) throw new Error('subscribe failed');
+    if (typeof fbq === 'function') fbq('track', 'Lead');
     $('emailRow').hidden = true;
     emailMsg("You're on the list. Your first digest arrives soon.", false);
   }).catch(function(){

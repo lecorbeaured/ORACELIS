@@ -25,7 +25,11 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
   <meta name="author" content="ORACELIS" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://oracelis.app/electional-astrology" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307070f'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23d4a574'%3E%E2%98%BD%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261018c">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261018c">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261018c">
+  <link rel="icon" href="favicon.ico?v=20261018c" sizes="48x48">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261018c">
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Electional Astrology Calculator: Best Dates for Weddings, Launches and More" />
   <meta property="og:description" content="Scan a date window and see the most favorable days by Moon sign, phase, void-of-course times and retrogrades. Free." />
@@ -187,13 +191,13 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --midnight: #07070f; --deep: #0d0d1a; --surface: #12121f; --violet: #1a1428;
+      --midnight: #0a0a12; --deep: #0d0d1a; --surface: #12121f; --violet: #1a1a2e;
       --gold: #d4a574; --gold-bright: #e8c89e; --gold-dim: #9a7355;
-      --starlight: #e8e4f0; --moonbeam: #a09ab8;
+      --starlight: #e8e4f0; --moonbeam: #c9c5d6;
       --glow: rgba(212,165,116,0.12); --glow-s: rgba(212,165,116,0.28);
       --green: #7ac0a0; --red: #c97070; --amber: #c0a070;
     }
-    html,body { min-height:100vh; background:var(--midnight); color:var(--starlight); font-family:'Josefin Sans',sans-serif; font-weight:300; overflow-x:hidden; }
+    html,body { min-height:100vh; background:var(--midnight); color:var(--starlight); font-family:'Josefin Sans',sans-serif; font-weight:300; line-height:1.7; overflow-x:hidden; }
 
     /* Stars */
     #stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
@@ -210,7 +214,7 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .nav-links { display:flex; gap:26px; align-items:center; }
     .nav-link { font-size:10px; letter-spacing:0.2em; color:var(--moonbeam); text-decoration:none; text-transform:uppercase; transition:color 0.2s; }
     .nav-link:hover { color:var(--gold); }
-    .nav-cta { font-size:10px; letter-spacing:0.2em; color:var(--midnight); background:var(--gold); padding:8px 16px; text-decoration:none; text-transform:uppercase; transition:background 0.2s; }
+    .nav-cta { font-size:10px; letter-spacing:0.2em; color:var(--midnight); background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%); box-shadow: 0 4px 20px rgba(212,165,116,0.3), inset 0 1px 0 rgba(255,255,255,0.2);; padding:8px 16px; text-decoration:none; text-transform:uppercase; transition:background 0.2s; }
     .nav-cta:hover { background:var(--gold-bright); }
 
     /* Breadcrumb */
@@ -246,7 +250,7 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .form-input { width:100%; background:var(--deep); border:1px solid rgba(212,165,116,0.18); color:var(--starlight); font-family:'Josefin Sans',sans-serif; font-size:13px; font-weight:300; padding:11px 14px; outline:none; transition:border-color 0.3s; }
     .form-input:focus { border-color:var(--gold); }
     .form-input option { background:var(--deep); }
-    .scan-btn { width:100%; background:var(--gold); border:none; color:var(--midnight); font-family:'Josefin Sans',sans-serif; font-size:12px; letter-spacing:0.3em; text-transform:uppercase; padding:16px; cursor:pointer; transition:background 0.3s, transform 0.2s; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:12px; }
+    .scan-btn { width:100%; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%); box-shadow: 0 4px 20px rgba(212,165,116,0.3), inset 0 1px 0 rgba(255,255,255,0.2);; border:none; color:var(--midnight); font-family:'Josefin Sans',sans-serif; font-size:12px; letter-spacing:0.3em; text-transform:uppercase; padding:16px; cursor:pointer; transition:background 0.3s, transform 0.2s; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:12px; }
     .scan-btn:hover { background:var(--gold-bright); transform:translateY(-1px); }
     .scan-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
 
@@ -294,7 +298,7 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .best-badge { position:absolute; top:0; right:16px; background:var(--gold); color:var(--midnight); font-size:9px; letter-spacing:0.2em; text-transform:uppercase; padding:3px 10px; }
 
     /* Upsell deep reading */
-    .deep-upsell { background:linear-gradient(135deg,#1a1428 0%,#0d0d1a 100%); border:1px solid rgba(212,165,116,0.38); padding:36px 40px; margin-bottom:32px; position:relative; overflow:hidden; }
+    .deep-upsell { background:linear-gradient(135deg,#1a1a2e 0%,#0d0d1a 100%); border:1px solid rgba(212,165,116,0.38); padding:36px 40px; margin-bottom:32px; position:relative; overflow:hidden; }
     .deep-upsell::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 80% 30%,rgba(212,165,116,0.08) 0%,transparent 60%); pointer-events:none; }
     .deep-eye { font-size:10px; letter-spacing:0.35em; color:var(--gold); text-transform:uppercase; margin-bottom:10px; }
     .deep-h { font-family:'Cormorant Garamond',serif; font-size:clamp(1.3rem,4vw,2rem); font-weight:300; line-height:1.2; margin-bottom:10px; }
@@ -306,7 +310,7 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .deep-price-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
     .deep-price { font-family:'Cormorant Garamond',serif; font-size:2.4rem; font-style:italic; color:var(--gold); line-height:1; }
     .deep-price-note { font-size:10px; color:var(--gold-dim); letter-spacing:0.14em; text-transform:uppercase; margin-top:3px; }
-    .deep-cta { background:var(--gold); border:none; color:var(--midnight); font-family:'Josefin Sans',sans-serif; font-size:12px; letter-spacing:0.25em; text-transform:uppercase; padding:14px 32px; cursor:pointer; transition:background 0.3s; }
+    .deep-cta { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%); box-shadow: 0 4px 20px rgba(212,165,116,0.3), inset 0 1px 0 rgba(255,255,255,0.2);; border:none; color:var(--midnight); font-family:'Josefin Sans',sans-serif; font-size:12px; letter-spacing:0.25em; text-transform:uppercase; padding:14px 32px; cursor:pointer; transition:background 0.3s; }
     .deep-cta:hover { background:var(--gold-bright); }
     .deep-bg-text { position:absolute; bottom:-20px; right:20px; font-family:'Cormorant Garamond',serif; font-size:8rem; font-style:italic; color:rgba(212,165,116,0.04); line-height:1; pointer-events:none; user-select:none; }
 
@@ -333,7 +337,7 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .m-price-row { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; background:rgba(212,165,116,0.05); border:1px solid rgba(212,165,116,0.14); margin-bottom:18px; }
     .m-price-label { font-size:12px; color:var(--moonbeam); }
     .m-price-val { font-family:'Cormorant Garamond',serif; font-size:2rem; font-style:italic; color:var(--gold); }
-    .m-buy { width:100%; background:var(--gold); border:none; color:var(--midnight); font-family:'Josefin Sans',sans-serif; font-size:12px; letter-spacing:0.24em; text-transform:uppercase; padding:15px; cursor:pointer; transition:background 0.3s; }
+    .m-buy { width:100%; background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%); box-shadow: 0 4px 20px rgba(212,165,116,0.3), inset 0 1px 0 rgba(255,255,255,0.2);; border:none; color:var(--midnight); font-family:'Josefin Sans',sans-serif; font-size:12px; letter-spacing:0.24em; text-transform:uppercase; padding:15px; cursor:pointer; transition:background 0.3s; }
     .m-buy:hover { background:var(--gold-bright); }
     .m-guarantee { text-align:center; font-size:11px; color:var(--gold-dim); letter-spacing:0.1em; margin-top:12px; }
     /* Loading state */
@@ -551,11 +555,11 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
 </main>
 
 <footer class="site-footer">
-  <div><div class="footer-brand">Oracelis</div><div class="footer-tagline">Celestial Timing &amp; Personalized Readings</div></div>
+  <div><div class="footer-brand">✦ ORACELIS ✦</div><div class="footer-tagline">Spiritual guidance for the modern seeker</div></div>
   <div class="footer-links">
     <a href="https://oracelis.app/electional-astrology" class="footer-link">Best Dates</a>
     <a href="https://oracelis.app/planetary-hours" class="footer-link">Planetary Hours</a>
-    <a href="https://oracelis.app/blog/" class="footer-link">Astrology Journal</a>
+    <a href="https://oracelis.app/blog/" class="footer-link">Blog</a>
     <a href="#" id="privacyLink" class="footer-link" hidden>Privacy Policy</a>
   </div>
   <div class="footer-copy">&copy; 2026 ORACELIS &nbsp;&middot;&nbsp; <a href="https://oracelis.app/" class="footer-link" style="display:inline">oracelis.app</a></div>
@@ -894,7 +898,7 @@ function showErr(msg){ var e = $('scanMsg'); e.textContent = msg || ''; e.hidden
 function getScoreColor(score){
   if (score >= 9) return {color:'#7ac0a0', label:'Excellent',   border:'rgba(122,192,160,0.6)'};
   if (score >= 6) return {color:'#c0a070', label:'Favorable',   border:'rgba(192,160,112,0.6)'};
-  if (score >= 3) return {color:'#a09ab8', label:'Neutral',     border:'rgba(160,154,184,0.5)'};
+  if (score >= 3) return {color:'#c9c5d6', label:'Neutral',     border:'rgba(201,197,214,0.5)'};
   return                 {color:'#c97070', label:'Challenging', border:'rgba(201,112,112,0.6)'};
 }
 

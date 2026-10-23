@@ -25,7 +25,11 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
   <meta name="author" content="ORACELIS" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
   <link rel="canonical" href="https://oracelis.app/planetary-hours" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307070f'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23d4a574'%3E%E2%98%BD%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=20261018c">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=20261018c">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=20261018c">
+  <link rel="icon" href="favicon.ico?v=20261018c" sizes="48x48">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=20261018c">
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Planetary Hours Calculator: What Hour Is It Now?" />
   <meta property="og:description" content="Find the current planetary hour for your location. Free Chaldean-order calculator with all 24 hours." />
@@ -196,20 +200,20 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --midnight: #07070f;
+      --midnight: #0a0a12;
       --deep:     #0d0d1a;
       --surface:  #12121f;
-      --violet:   #1a1428;
+      --violet:   #1a1a2e;
       --gold:        #d4a574;
       --gold-bright: #e8c89e;
       --gold-dim:    #9a7355;
       --starlight:   #e8e4f0;
-      --moonbeam:    #a09ab8;
+      --moonbeam:    #c9c5d6;
       --glow:        rgba(212,165,116,0.12);
       --glow-strong: rgba(212,165,116,0.28);
     }
 
-    html, body { min-height: 100vh; background: var(--midnight); color: var(--starlight); font-family: 'Josefin Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+    html, body { min-height: 100vh; background: var(--midnight); color: var(--starlight); font-family: 'Josefin Sans', sans-serif; font-weight: 300; line-height: 1.7; overflow-x: hidden; }
 
     /* ── Stars ── */
     #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
@@ -288,7 +292,7 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .cur-meaning { margin-top: 16px; font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-style: italic; color: var(--moonbeam); line-height: 1.65; border-top: 1px solid rgba(212,165,116,0.12); padding-top: 14px; }
 
     /* ── Upsell card ── */
-    .upsell { background: linear-gradient(135deg, #1a1428 0%, #0d0d1a 100%); border: 1px solid rgba(212,165,116,0.38); padding: 28px 32px; margin-bottom: 24px; position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.3s, box-shadow 0.3s; animation: fadeUp 0.9s 0.3s ease both; }
+    .upsell { background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%); border: 1px solid rgba(212,165,116,0.38); padding: 28px 32px; margin-bottom: 24px; position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.3s, box-shadow 0.3s; animation: fadeUp 0.9s 0.3s ease both; }
     .upsell:hover { border-color: var(--gold); box-shadow: 0 0 28px rgba(212,165,116,0.1); }
     .upsell::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 80% 50%, rgba(212,165,116,0.07) 0%, transparent 60%); pointer-events: none; }
     .upsell-eye { font-size: 10px; letter-spacing: 0.32em; color: var(--gold); text-transform: uppercase; margin-bottom: 7px; }
@@ -316,7 +320,7 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
     .email-in { flex: 1; background: var(--deep); border: 1px solid rgba(212,165,116,0.2); border-right: none; color: var(--starlight); font-family: 'Josefin Sans', sans-serif; font-size: 13px; font-weight: 300; padding: 12px 14px; outline: none; transition: border-color 0.3s; min-width: 0; }
     .email-in::placeholder { color: var(--gold-dim); opacity: 0.55; }
     .email-in:focus { border-color: var(--gold); }
-    .email-btn { background: var(--gold); border: none; color: var(--midnight); font-family: 'Josefin Sans', sans-serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 12px 18px; cursor: pointer; flex-shrink: 0; transition: background 0.3s; }
+    .email-btn { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 100%); box-shadow: 0 4px 20px rgba(212,165,116,0.3), inset 0 1px 0 rgba(255,255,255,0.2); border: none; color: var(--midnight); font-family: 'Josefin Sans', sans-serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 12px 18px; cursor: pointer; flex-shrink: 0; transition: background 0.3s; }
     .email-btn:hover { background: var(--gold-bright); }
     .email-ok { font-size: 12px; color: var(--gold); letter-spacing: 0.14em; margin-top: 10px; display: none; }
 
@@ -638,13 +642,13 @@ src="https://www.facebook.com/tr?id=1265608872395585&ev=PageView&noscript=1"
 
 <footer class="site-footer">
   <div>
-    <div class="footer-brand">Oracelis</div>
-    <div class="footer-tagline">Celestial Timing &amp; Personalized Readings</div>
+    <div class="footer-brand">✦ ORACELIS ✦</div>
+    <div class="footer-tagline">Spiritual guidance for the modern seeker</div>
   </div>
   <div class="footer-links">
     <a href="https://oracelis.app/planetary-hours" class="footer-link">Planetary Hours</a>
     <a href="https://oracelis.app/electional-astrology" class="footer-link">Best Dates</a>
-    <a href="https://oracelis.app/blog/" class="footer-link">Astrology Journal</a>
+    <a href="https://oracelis.app/blog/" class="footer-link">Blog</a>
     <a href="#" id="privacyLink" class="footer-link" hidden>Privacy Policy</a>
   </div>
   <div class="footer-copy">&copy; 2026 ORACELIS &nbsp;&middot;&nbsp; <a href="https://oracelis.app/" class="footer-link" style="display:inline">oracelis.app</a></div>

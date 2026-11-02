@@ -3,6 +3,7 @@
 
 const { Resend } = require('resend');
 const { rateLimit } = require('./_rateLimit');
+const { audienceId } = require('./_audience');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -114,14 +115,15 @@ module.exports = async (req, res) => {
     console.log('Reading email sent', { tier: tier || 'free', pageCount: safePages.length, timestamp: new Date().toISOString() });
 
     // Add to Resend Audience for marketing, if one is configured
-    if (process.env.RESEND_AUDIENCE_ID) {
+    const audId = audienceId();
+    if (audId) {
       try {
         // The Resend SDK returns failures as { error } instead of throwing,
         // so the result has to be checked or a failed save is invisible.
         const { error: audienceResultError } = await resend.contacts.create({
           email,
           firstName: name,
-          audienceId: process.env.RESEND_AUDIENCE_ID,
+          audienceId: audId,
           unsubscribed: false
         });
         if (audienceResultError) {
@@ -132,7 +134,7 @@ module.exports = async (req, res) => {
         // Don't fail the request if audience add fails
       }
     } else {
-      console.warn('RESEND_AUDIENCE_ID is not set — this email was sent but the contact was not saved to any Resend Audience.');
+      console.warn('RESEND_AUDIENCE_ID is missing or not a valid UUID — this email was sent but the contact was not saved to any Resend Audience.');
     }
 
     // Archive the reader in our own Upstash list (all tiers). Resend's

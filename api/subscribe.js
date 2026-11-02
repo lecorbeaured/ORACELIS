@@ -3,6 +3,7 @@
 
 const { Resend } = require('resend');
 const { rateLimit } = require('./_rateLimit');
+const { audienceId } = require('./_audience');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -21,15 +22,16 @@ module.exports = async (req, res) => {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || email.length > 254) {
     return res.status(400).json({ error: 'Invalid email' });
   }
-  if (!process.env.RESEND_API_KEY || !process.env.RESEND_AUDIENCE_ID) {
-    console.error('subscribe: RESEND_API_KEY or RESEND_AUDIENCE_ID is not set');
+  const audId = audienceId();
+  if (!process.env.RESEND_API_KEY || !audId) {
+    console.error('subscribe: RESEND_API_KEY missing or RESEND_AUDIENCE_ID missing/not a valid UUID');
     return res.status(500).json({ error: 'Not configured' });
   }
 
   try {
     const { error } = await resend.contacts.create({
       email,
-      audienceId: process.env.RESEND_AUDIENCE_ID,
+      audienceId: audId,
       unsubscribed: false
     });
     if (error) {

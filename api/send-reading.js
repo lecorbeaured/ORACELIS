@@ -116,12 +116,17 @@ module.exports = async (req, res) => {
     // Add to Resend Audience for marketing, if one is configured
     if (process.env.RESEND_AUDIENCE_ID) {
       try {
-        await resend.contacts.create({
+        // The Resend SDK returns failures as { error } instead of throwing,
+        // so the result has to be checked or a failed save is invisible.
+        const { error: audienceResultError } = await resend.contacts.create({
           email,
           firstName: name,
           audienceId: process.env.RESEND_AUDIENCE_ID,
           unsubscribed: false
         });
+        if (audienceResultError) {
+          console.error('Audience save failed:', audienceResultError);
+        }
       } catch (audienceError) {
         console.error('Audience error:', audienceError);
         // Don't fail the request if audience add fails

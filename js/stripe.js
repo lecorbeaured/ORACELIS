@@ -8,6 +8,10 @@
  */
 
 async function openCheckout(tier) {
+  // Meta Pixel: clicking to pay is an InitiateCheckout. Fired before the
+  // redirect so the event is sent while the page is still alive.
+  if (typeof fbq === 'function') fbq('track', 'InitiateCheckout', { content_name: tier });
+
   // Get stored user data
   const userData = window.readingUserData || {};
   

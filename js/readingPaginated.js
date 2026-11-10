@@ -410,6 +410,7 @@ function updateLockedUI(requiredTier, nextTitle) {
     descEl.textContent = nextLine || 'Discover how to work with your patterns.';
 
     pricingEl.innerHTML = `
+      <div class="pricing-options">
       <div class="pricing-option">
         <div class="pricing-option-header">
           <span class="pricing-option-name">Full Current State Reading</span>
@@ -436,7 +437,8 @@ function updateLockedUI(requiredTier, nextTitle) {
         </ul>
         <button class="btn btn-primary unlock-btn" onclick="handleUpgrade('tier2')">Get Complete</button>
       </div>
-      
+      </div>
+
       <button class="maybe-later-btn" onclick="handleMaybeLater()">Maybe Later</button>
       ${trustLine}
     `;
@@ -445,6 +447,7 @@ function updateLockedUI(requiredTier, nextTitle) {
     descEl.textContent = nextLine || 'Get the complete picture.';
 
     pricingEl.innerHTML = `
+      <div class="pricing-options">
       <div class="pricing-option recommended">
         <div class="pricing-option-header">
           <span class="pricing-option-name">Complete Reading</span>
@@ -456,6 +459,7 @@ function updateLockedUI(requiredTier, nextTitle) {
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Alignment mantra</li>
         </ul>
         <button class="btn btn-primary unlock-btn" onclick="handleUpgrade('upgrade')">Unlock $20</button>
+      </div>
       </div>
 
       <button class="maybe-later-btn" onclick="handleMaybeLater()">Maybe Later</button>

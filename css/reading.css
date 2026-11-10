@@ -225,12 +225,24 @@
 
 .locked-pricing {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The cards live in their own row so the Maybe Later button and trust
+   line stack underneath instead of becoming extra flex columns. */
+.pricing-options {
+  display: flex;
   gap: var(--space-md);
   justify-content: center;
+  align-items: stretch;
+  width: 100%;
+  padding-top: 12px; /* room for the BEST VALUE badge */
 }
 
 .pricing-option {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   max-width: 220px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(200, 197, 214, 0.15);
@@ -313,16 +325,13 @@
 }
 
 /* Single option layout (for upgrade) */
-.locked-pricing:has(.pricing-option:only-child) {
-  justify-content: center;
-}
-
-.locked-pricing .pricing-option:only-child {
+.pricing-options .pricing-option:only-child {
   max-width: 260px;
 }
 
 /* Trust line under the gate pricing */
 .locked-trust {
+  max-width: 420px;
   color: var(--silver-dust);
   font-family: var(--font-body);
   font-size: 0.8rem;
@@ -364,7 +373,7 @@
     font-size: 1.1rem;
   }
   
-  .locked-pricing {
+  .pricing-options {
     flex-direction: column;
     align-items: center;
     gap: var(--space-sm);

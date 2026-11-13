@@ -96,7 +96,7 @@ function day3Html(name) {
   const todayExample = `For example, born March 14, and today is the ${day}${suffix}: ${math}. ${total === 8 ? 'An' : 'A'} ${total} day.`;
   const body = `
 <p style="color:#f5f5f7;font-size:18px;">Hi ${name},</p>
-<p>Your birth date gave you your life path number. But numbers move. Every single day carries its own vibration, and when you know it, you stop pushing against the week and start moving with it.</p>
+<p>Your free reading gave you your core theme, the pattern shaping your week. But numbers move. Every single day carries its own vibration, and when you know it, you stop pushing against the week and start moving with it.</p>
 <p>Here is the 30-second calculation. Add your birth month + birth day + today's date, then reduce to a single digit.</p>
 <p>${todayExample}</p>
 <p>Each result has a flavor:</p>
@@ -121,7 +121,6 @@ function day7Html(name, unlockUrl) {
 <li><strong style="color:#d4a574;">Your hidden strengths:</strong> the ones you undervalue most</li>
 <li><strong style="color:#d4a574;">What's keeping you stuck:</strong> named plainly, with a way through</li>
 </ul>
-<p style="font-style:italic;border-left:2px solid #d4a574;padding-left:16px;">"It described exactly what I'm going through right now and gave me hope for what's coming. I've printed it and read it every morning." — Sarah M., Los Angeles</p>
 <p>The Full Current State Reading is <strong style="color:#d4a574;">$29, one time</strong>. No subscription, no upsell maze. If it doesn't resonate, you're covered by the 7-day guarantee.</p>
 <p align="center" style="margin:30px 0;">
 <a href="${unlockUrl}" style="display:inline-block;background:linear-gradient(135deg,#d4a574 0%,#c49a6c 100%);color:#0a0a12;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;letter-spacing:0.05em;">Unlock My Full Reading →</a>
